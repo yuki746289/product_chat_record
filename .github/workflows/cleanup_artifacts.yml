@@ -1,0 +1,23 @@
+# Created: 2026-10-09 22:09 JST
+# This cleanup job can be scheduled independently. Deletes only `charts` artifacts.
+name: Cleanup Charts Artifacts
+on:
+  workflow_dispatch:
+  # schedule:
+  #   - cron: '19,49 * * * *'  # Enable when unattended operation is approved.
+permissions:
+  actions: write
+  contents: read
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Delete artifacts older than 8 hours
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: python scripts/cleanup_artifacts.py

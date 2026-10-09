@@ -1,0 +1,46 @@
+# Created: 2026-10-09 22:09 JST
+# Scheduled LIVE execution intentionally disabled pending authorized OAuth flow
+# and TradingView's written approval for 30-minute unattended processing.
+name: Generate Charts
+on:
+  workflow_dispatch:
+    inputs:
+      demo:
+        description: 'Generate synthetic demo PNGs (not actual market charts)'
+        type: boolean
+        required: true
+        default: true
+  # schedule:
+  #   - cron: '7,37 * * * *'  # Enable after live authorization and tests.
+permissions:
+  contents: read
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Test
+        run: python -m pytest -q
+      - name: Generate images
+        env:
+          TRADINGVIEW_MCP_ACCESS_TOKEN: ${{ secrets.TRADINGVIEW_MCP_ACCESS_TOKEN }}
+          DEMO: ${{ inputs.demo }}
+        run: |
+          if [ "$DEMO" = 'true' ]; then
+            python -m src.main --demo
+          else
+            python -m src.main
+          fi
+      - name: Upload charts artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: charts
+          path: output/
+          retention-days: 1
+          if-no-files-found: error
