@@ -1,0 +1,9 @@
+# Created: 2026-10-09 22:09 JST
+__pycache__/
+.pytest_cache/
+*.py[cod]
+output/
+.venv/
+.env
+*.token
+*.log
