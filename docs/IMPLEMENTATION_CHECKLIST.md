@@ -4,9 +4,9 @@
 | No | Task | State |
 |---:|---|---|
 | 1 | Public GitHub repository identified | Done |
-| 2 | YAML configuration validation | Implemented; tests pending |
-| 3 | 2×5 chart / nine timeframes / info panel | Implemented; smoke test pending |
-| 4 | EMA20/30/40 and RCI9/14/26 | Implemented; tests pending |
+| 2 | YAML configuration validation | Implemented; offline tests passed |
+| 3 | 2×5 chart / nine timeframes / info panel | Implemented; PNG smoke test passed |
+| 4 | EMA20/30/40 and RCI9/14/26 | Implemented; offline tests passed |
 | 5 | 8H UTC-aligned resampling | Implemented; TradingView cross-check pending |
 | 6 | Official MCP get_ohlcv adapter | Implemented; live authentication/response unverified |
 | 7 | 30-minute production scheduled capture | HOLD: permission and unattended OAuth unverified |
