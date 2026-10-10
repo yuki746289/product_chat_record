@@ -1,2 +1,0 @@
-One-time synthetic-only GitHub Actions smoke test for Saxo local branch.
-No Saxo credentials or market data involved.
