@@ -1,4 +1,0 @@
-GitHub Actions smoke-test request (2026-10-10 JST)
-
-This commit triggers the Generate Charts workflow in demo mode only.
-The real TradingView provider remains disabled.
