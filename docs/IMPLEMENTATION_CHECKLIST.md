@@ -20,12 +20,12 @@
 | 15 | Windows EXE build and autostart registry behavior | Implemented; Windows executable build/run verification pending |
 | 16 | README Git pull/push commands for main | Done |
 | 17 | Full regression suite | 18 tests passed in Linux environment |
-
 | 18 | TradingView official MCP documentation review | Done: 2026-10-10; official URL, OAuth, tool intervals confirmed |
 | 19 | TradingView unattended polling and derived-image rights | HOLD: documented permission not confirmed; request confirmation |
 | 20 | Public GitHub Artifact sharing rights | HOLD: potential third-party access/redistribution; request confirmation |
 | 21 | OAuth 2.1 browser authorization and renewable headless auth | HOLD: needs user login, provider OAuth grant verification |
 | 22 | Production readiness and rollback plan | Documented in docs/TRADINGVIEW_MCP_AUTHORIZATION_REVIEW_20261010.md; live rollout blocked |
 
-Do not enable a 30-minute live workflow before tasks 6, 10, 11 have passed, and
-market data provider terms explicitly authorize this intended use.
+Do not enable 30-minute live polling before tasks 6, 10, 11, 19, 20, and 21
+are verified and documented, including explicit permission for the intended
+unattended processing and distribution, and a tested OAuth renewal mechanism.
