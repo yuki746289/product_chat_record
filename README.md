@@ -31,6 +31,22 @@ registered URL. Saxo recommends PKCE for native apps; this local confidential
 client uses the already-registered Code grant and stores its secret in the
 Windows credential vault. This is intended for personal use on your own PC.
 
+### First checkout of the Saxo development branch
+
+This implementation is currently in **PR #3**, not `main`. To test it in
+your existing Windows checkout without modifying `main`:
+
+```bash
+git fetch origin
+git switch --track origin/feature/saxo-windows-local-20261010
+```
+
+If the feature branch already exists locally, use
+`git switch feature/saxo-windows-local-20261010` and
+`git pull --ff-only origin feature/saxo-windows-local-20261010`.
+After the Windows SIM test succeeds, PR #3 can be merged and normal
+`git pull --ff-only origin main` will retrieve the released version.
+
 ### Initial one-time authentication (Windows Command Prompt)
 
 From your local `product_chat_record` directory:
