@@ -1,1 +1,0 @@
-One-time synthetic regression for 13 categorized FX symbols. No Saxo account credentials or market data.
