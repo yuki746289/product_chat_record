@@ -35,3 +35,9 @@ output:
   local_dir: 'C:/TradingViewCharts' # Edit for your Windows PC.
   artifact_name: charts
   retention_hours: 8
+
+# Windows tray application: polls GitHub while running.
+local_monitor:
+  poll_seconds: 60
+  retention_hours: 8
+  min_folders: 16

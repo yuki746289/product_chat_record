@@ -50,15 +50,111 @@ the latest successful run, preventing closed-market runs from breaking downloads
 - After authorization, set `provider.enabled: true`, establish a secure renewable OAuth access token flow, and provide `TRADINGVIEW_MCP_ACCESS_TOKEN` as a **GitHub Actions secret**. An access token alone is not an unattended refresh strategy.
 - GitHub-hosted runners may start later than the scheduled time; exact 30-minute capture is not guaranteed.
 
-## Local Windows retrieval
+## Local Windows app (1-minute GitHub polling)
 
-Install Python, GitHub CLI (`gh`), authenticate using `gh auth login`, install Python dependencies, then run:
+**Current limitation:** TradingView MCP unattended access has not yet been
+validated or enabled. Without successful chart-generation runs on GitHub, the
+Windows app will have no live images to download.
+
+Windows requirements: install [Python](https://www.python.org/),
+[GitHub CLI](https://cli.github.com/) (`gh`), and sign in once with
+`gh auth login`. The executable still needs `gh.exe` available in the
+Windows user's PATH; log in as the same Windows user who will run the app.
+
+Build a Windows `.exe` **on a Windows PC** (not Linux):
+
+```bat
+scripts\build_windows.bat
+```
+
+This creates `dist\ChartRecorder.exe` and, if absent, `dist\setting.yaml`.
+Edit the copy of `dist\setting.yaml` for that executable (in particular,
+`output.local_dir`). The EXE reads this external file, not an embedded copy.
+Launch `dist\ChartRecorder.exe` once; it stays in the Windows system tray,
+checking GitHub every **60 seconds**. From its right-click menu you can poll
+now, pause, open the output directory, enable start-at-login (for built EXE
+only), or exit. Start-at-login uses the **current user's** Windows registry,
+without administrator privileges. Pausing disables polling until resumed.
+The log is stored in `<output.local_dir>\.chart_recorder.log` (rotating).
+
+For development without packaging:
+
+```bat
+python -m pip install -r requirements-windows.txt
+python -m src.tray_app --config setting.yaml
+```
+
+### Image retention and missed downloads
+
+Settings in `setting.yaml`:
+
+```yaml
+local_monitor:
+  poll_seconds: 60
+  retention_hours: 8
+  min_folders: 16
+```
+
+After every poll, preserve **all timestamp folders not older than eight
+hours**, and **at least the newest 16 nonempty timestamp folders**, even
+across weekends/market holidays. Delete only folders matching
+`YYYYMMDD_HHmm` that contain PNGs and violate both retention criteria.
+Unknown folder names are never deleted. Images remain at
+`<output.local_dir>\yyyyMMdd_HHmm\<currency_pair>.png`.
+A folder can have fewer pairs when TradingView returns fresh data for only
+some symbols. A `.downloaded_artifacts.json` file prevents repeat downloads.
+
+The app backfills all **available unprocessed** GitHub artifacts in oldest-
+first order (up to the latest 16 plus any within the eight-hour window). Images
+already expired or deleted from GitHub cannot be recovered. An interruption
+keeps the last successful images and retries missing downloads. No images are
+created locally during a market closure when no new GitHub artifacts exist.
+The 8-hour retention applies to local files; GitHub currently keeps its
+Artifacts for one day unless cleanup is run (the automated cleanup cron is
+currently disabled).
+
+### Manual BAT download (fallback)
 
 ```bat
 scripts\download_charts.bat
 ```
 
-The BAT wrapper calls `src.local_download`, which gets the latest successful run's `charts` artifact and copies all configured pairs to `local_dir/YYYYMMDD_HHmm/{pair}.png`, preserving past folders and ignoring duplicate run IDs. Schedule this BAT through Windows Task Scheduler every 30 minutes (while the PC is online). An expired artifact cannot be recovered.
+This checks once and exits. It uses the **same** download history and cleanup
+rules as the tray app; do not schedule both concurrently. Run the app instead
+for continuous 1-minute monitoring.
+
+## Updating setting.yaml and pushing to GitHub
+
+The PR work is on `feature/chart-recorder-initial-20261009`, **not** `main`.
+Work in this feature branch until the PR is reviewed and merged.
+
+One-time checkout (Windows Command Prompt or PowerShell):
+
+```bat
+git clone --branch feature/chart-recorder-initial-20261009 https://github.com/yuki746289/product_chat_record.git
+cd product_chat_record
+```
+
+**Before editing** `setting.yaml`, get the latest changes:
+
+```bat
+git switch feature/chart-recorder-initial-20261009
+git pull --ff-only origin feature/chart-recorder-initial-20261009
+```
+
+Edit `setting.yaml`, then stage and push **only that file**:
+
+```bat
+git status
+git add setting.yaml
+git commit -m "Update chart settings"
+git push origin feature/chart-recorder-initial-20261009
+```
+
+The repository's `setting.yaml` is public: **never write tokens or secrets**
+to it. Keep OAuth tokens in GitHub Secrets or local protected credentials.
+If `git pull --ff-only` refuses because of local commits or uncommitted
+changes, resolve the Git status first; do not force-push.
 
 ## Fidelity limitations
 
