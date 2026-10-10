@@ -58,11 +58,22 @@ Thank you.
 5. `provider.enabled` を明示的に許可した実行環境だけで有効にし、手動テスト→単一通貨ペア→複数通貨ペアの順に段階展開する。公開配布が未許可ならPublic Artifactは使わない。
 6. 承認済みの利用条件と上限に合わせて30分cronを有効化し、429/401/403/5xx、更新停止、欠損、権限切れ、画像数、GitHub課金を監視する。
 
+## 2026-10-10 実データ応答の手動検証結果
+
+- ChatGPTに接続されたTradingView PlusのOAuthセッションを用いて、`FX:USDJPY` のOHLCVを手動で取得した。GitHub ActionsやPythonプロセスには認証情報を渡していない。
+- 対応する8種類の時間足（1m、5m、15m、1h、4h、1D、1W、M）すべて `success: true` を返した。4時間足は440本、その他は各220本を取得した。
+- 取得形式は `{success:true,format:'rows',bars:[{t,o,h,l,c,v}], count, has_more,...}`。時刻 `t` はUTCのUnix秒で昇順。4時間足440本に対してOHLCの整合性、時刻の重複・順序を検査して問題なかった。
+- 4時間足440本をUTC 0時基準で8時間足にまとめた結果、**205本**の完全な2本組が構成でき、チャート表示に必要な110本を確保できた。TradingView画面の8Hセッションとの一致は今後比較する必要がある。
+- コードの改善点は、`success:false` の明示的な検出と、MCPサーバーが提供する `mcp_tv_get_ohlcv` または `get_ohlcv` の実ツール名を `list_tools()` で判別すること。
+- GitHub側に加えた8件の契約テストでは、市場データの生値を使わず、実際のレスポンス形式と同じ構造の**合成データ**を利用する。ローカルで同等コードの8テストが成功した。
+- **未検証:** GitHub ActionsからのPython MCP OAuth通信、アクセストークン更新、TradingView利用規約上の無人取得許諾、1つの実データ9画面画像としての通し処理、TradingView UIとのEMA/RCI数値照合。
+- 元の `provider.enabled: false` とコメントアウト済みの30分cronは維持する。
+
 ## 既存実装の監査結果
 
 - `setting.yaml`: `provider.enabled: false`（安全側の初期設定）。
 - `.github/workflows/generate_charts.yml`: `schedule`コメントアウト。手動デモ実行が可能。
-- `src/providers.py`: `TRADINGVIEW_MCP_ACCESS_TOKEN` 環境変数を要求するMCPクライアントを実装済み。ただしOAuthの取得・期限切れ時の更新は未実装。
+- `src/providers.py`: `TRADINGVIEW_MCP_ACCESS_TOKEN` 環境変数を要求するMCPクライアントを実装済み。ただしOAuthの取得・期限切れ時の更新、GitHub Actionsでの実通信は未実装。
 - `requirements.txt`: MCP Python SDK v1を指定。上流SDK v2のAPIは変更されているため、導入時は使用バージョンを固定して同一バージョンで試験する。
 - TradingViewアプリやブラウザの常時起動は予定構成上不要。ただし初回対話認証はユーザー操作が必要。
 
