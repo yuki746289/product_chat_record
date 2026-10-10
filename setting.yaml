@@ -1,0 +1,43 @@
+# Created: 2026-10-09 22:09 JST
+# Currency pairs and output configuration. Edit symbol names to match TradingView.
+repository: yuki746289/product_chat_record
+provider:
+  type: tradingview_mcp
+  url: https://mcp.tradingview.com/mcp
+  # Production requires an approved unattended OAuth access-token flow.
+  enabled: false
+symbols:
+  - pair: USDJPY
+    tradingview: FX:USDJPY
+  - pair: EURUSD
+    tradingview: FX:EURUSD
+  - pair: GBPJPY
+    tradingview: FX:GBPJPY
+market:
+  skip_stale: true
+  max_1m_age_minutes: 10  # Data freshness check; not an exchange holiday calendar.
+chart:
+  timeframes: [1M, 5M, 15M, 1H, 4H, 8H, 1D, 1W, 1Mn]
+  ema: [20, 30, 40]
+  rci: [9, 14, 26]
+  columns: 2
+  bars: 110
+  history_bars: 220
+  right_padding_bars: 12
+  dpi: 110
+  figsize: [19, 25]
+  timezone: Asia/Tokyo
+  theme: dark
+output:
+  staging_dir: output
+  timezone: Asia/Tokyo
+  folder_format: '%Y%m%d_%H%M'
+  local_dir: 'C:/TradingViewCharts' # Edit for your Windows PC.
+  artifact_name: charts
+  retention_hours: 8
+
+# Windows tray application: polls GitHub while running.
+local_monitor:
+  poll_seconds: 60
+  retention_hours: 8
+  min_folders: 16
