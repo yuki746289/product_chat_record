@@ -21,6 +21,7 @@
 | 16 | README Git pull/push commands for main | Done |
 | 17 | Full regression suite | 18 tests passed in Linux environment |
 | 18 | TradingView official MCP documentation review | Done: 2026-10-10; official URL, OAuth, tool intervals confirmed |
+| 23 | TradingView subscription plan eligibility | Plus plan reported by user; Essential-or-above requirement satisfied subject to paid account validation |
 | 19 | TradingView unattended polling and derived-image rights | HOLD: documented permission not confirmed; request confirmation |
 | 20 | Public GitHub Artifact sharing rights | HOLD: potential third-party access/redistribution; request confirmation |
 | 21 | OAuth 2.1 browser authorization and renewable headless auth | HOLD: needs user login, provider OAuth grant verification |
