@@ -20,6 +20,9 @@ def load_settings(path):
             raise ValueError(f'invalid currency pair entry: {item}')
         if not re.fullmatch(r'[A-Za-z0-9_.-]+:[A-Za-z0-9_.-]+', str(item.get('tradingview', ''))):
             raise ValueError(f'invalid TradingView symbol for {item["pair"]}')
+        category = item.get('category', 'uncategorized')
+        if not isinstance(category, str) or not re.fullmatch(r'[a-z][a-z0-9_]{0,39}', category):
+            raise ValueError(f'invalid category for {item["pair"]}')
         if item['pair'] in seen:
             raise ValueError(f'duplicate currency pair: {item["pair"]}')
         seen.add(item['pair'])

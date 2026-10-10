@@ -71,7 +71,13 @@ def clean_local_images(local_dir, now, retention_hours=8, min_folders=16, time_z
         if not entry.is_dir() or entry.is_symlink():
             continue
         local_dt = parse_chart_stamp(entry.name, time_zone)
-        if local_dt is not None and any(entry.glob("*.png")):
+        # Both timestamp/*.png and timestamp/category/*.png count as snapshots.
+        direct = any(entry.glob("*.png"))
+        categorized = any(
+            child.is_dir() and not child.is_symlink() and any(child.glob("*.png"))
+            for child in entry.iterdir()
+        )
+        if local_dt is not None and (direct or categorized):
             candidates.append((local_dt.astimezone(timezone.utc), entry))
     candidates.sort(key=lambda item: (item[0], item[1].name), reverse=True)
     cutoff = now.astimezone(timezone.utc) - timedelta(hours=retention_hours)
@@ -131,8 +137,16 @@ def _find_artifact_batch(temp_dir, configured_pairs):
             continue
         if not STAMP.fullmatch(candidate.name):
             continue
-        files = [candidate / f"{pair}.png" for pair in configured_pairs
-                 if (candidate / f"{pair}.png").is_file()]
+        # Accept both the historical flat artifact and nested category output.
+        roots = [candidate, *(child for child in candidate.iterdir()
+                              if child.is_dir() and not child.is_symlink())]
+        files = []
+        for pair in configured_pairs:
+            matching = [folder / f"{pair}.png" for folder in roots
+                        if (folder / f"{pair}.png").is_file()]
+            if len(matching) > 1:
+                raise ValueError(f"Ambiguous artifact images for {pair}")
+            files.extend(matching)
         if files:
             choices.append((candidate, files))
     if len(choices) != 1:
@@ -188,9 +202,11 @@ def poll_once(config_path, now=None):
                 target = root / batch.name
                 target.mkdir(parents=True, exist_ok=True)
                 for file in files:
-                    intermediate = target / (file.name + ".part")
+                    destination = target / file.relative_to(batch)
+                    destination.parent.mkdir(parents=True, exist_ok=True)
+                    intermediate = destination.with_name(destination.name + ".part")
                     shutil.copyfile(file, intermediate)
-                    intermediate.replace(target / file.name)
+                    intermediate.replace(destination)
                 downloaded.append(target)
                 processed.add(artifact_id)
                 _save_state(root, processed)

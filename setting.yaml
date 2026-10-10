@@ -1,21 +1,34 @@
-# Created: 2026-10-09 22:09 JST
-# Currency pairs and output configuration. Edit symbol names to match TradingView.
+# Created: 2026-10-10 JST
+# FX currency pairs and local Saxo OpenAPI chart output configuration.
 repository: yuki746289/product_chat_record
+
 provider:
   type: tradingview_mcp
   url: https://mcp.tradingview.com/mcp
-  # Production requires an approved unattended OAuth access-token flow.
   enabled: false
+
 symbols:
-  - pair: USDJPY
-    tradingview: FX:USDJPY
-  - pair: EURUSD
-    tradingview: FX:EURUSD
-  - pair: GBPJPY
-    tradingview: FX:GBPJPY
+  # クロス円以外
+  - {pair: GBPAUD, category: cross_non_jpy, tradingview: FX:GBPAUD}
+  - {pair: AUDUSD, category: cross_non_jpy, tradingview: FX:AUDUSD}
+  - {pair: GBPUSD, category: cross_non_jpy, tradingview: FX:GBPUSD}
+  - {pair: EURGBP, category: cross_non_jpy, tradingview: FX:EURGBP}
+  - {pair: USDCAD, category: cross_non_jpy, tradingview: FX:USDCAD}
+  - {pair: EURUSD, category: cross_non_jpy, tradingview: FX:EURUSD}
+  - {pair: GBPNZD, category: cross_non_jpy, tradingview: FX:GBPNZD}
+
+  # クロス円
+  - {pair: AUDJPY, category: cross_jpy, tradingview: FX:AUDJPY}
+  - {pair: GBPJPY, category: cross_jpy, tradingview: FX:GBPJPY}
+  - {pair: USDJPY, category: cross_jpy, tradingview: FX:USDJPY}
+  - {pair: EURJPY, category: cross_jpy, tradingview: FX:EURJPY}
+  - {pair: CADJPY, category: cross_jpy, tradingview: FX:CADJPY}
+  - {pair: NZDJPY, category: cross_jpy, tradingview: FX:NZDJPY}
+
 market:
   skip_stale: true
-  max_1m_age_minutes: 10  # Data freshness check; not an exchange holiday calendar.
+  max_1m_age_minutes: 10
+
 chart:
   timeframes: [1M, 5M, 15M, 1H, 4H, 8H, 1D, 1W, 1Mn]
   ema: [20, 30, 40]
@@ -28,16 +41,25 @@ chart:
   figsize: [19, 25]
   timezone: Asia/Tokyo
   theme: dark
+
 output:
   staging_dir: output
   timezone: Asia/Tokyo
   folder_format: '%Y%m%d_%H%M'
-  local_dir: 'C:/TradingViewCharts' # Edit for your Windows PC.
+  local_dir: 'C:/TradingViewCharts'
   artifact_name: charts
   retention_hours: 8
 
-# Windows tray application: polls GitHub while running.
+# Do not place secrets or OAuth tokens in this public configuration file.
+saxo:
+  enabled: true
+  environment: sim
+  redirect_uri: http://localhost:8765/callback
+  price_side: bid
+
 local_monitor:
+  mode: saxo_local
   poll_seconds: 60
+  chart_interval_minutes: 30
   retention_hours: 8
   min_folders: 16

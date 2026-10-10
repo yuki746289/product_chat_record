@@ -16,6 +16,127 @@ information panel. EMA: 20, 30, 40. RCI: 9, 14, 26.
 TradingView official MCP: https://www.tradingview.com/mcp/docs
 TradingView use policy: https://www.tradingview.com/policies/
 
+
+## Saxo FX category folders (default configuration)
+
+The public `setting.yaml` contains **13 FX pairs**, written as one inline YAML
+mapping per pair, grouped as `cross_non_jpy` (7 pairs) and `cross_jpy` (6 pairs).
+`ERUJPY` was corrected to `EURJPY`. Indices, metals and cryptocurrency
+instruments are not included.
+
+In Saxo local mode, files are written to:
+
+```text
+C:/TradingViewCharts/
+  YYYYMMDD_HHmm/
+    cross_non_jpy/
+      GBPAUD.png  AUDUSD.png  GBPUSD.png  EURGBP.png
+      USDCAD.png  EURUSD.png  GBPNZD.png
+    cross_jpy/
+      AUDJPY.png  GBPJPY.png  USDJPY.png
+      EURJPY.png  CADJPY.png  NZDJPY.png
+```
+
+Retention is evaluated at the timestamp-folder level: preserve **every folder
+within 8 hours or the newest 16 timestamp folders**, then delete older batches.
+Existing top-level timestamp folders with PNGs are also recognized. The legacy
+GitHub Artifact downloader accepts both category-layout and flat images.
+
+After pulling an updated `setting.yaml`, restart the Windows tray app so
+that the expanded symbol list takes effect. Tokens and App Secret remain only
+in Windows Credential Manager.
+
+## Recommended: Saxo local Windows mode (SIM-first)
+
+**No GitHub Actions or GitHub CLI is needed for chart generation in this mode.**
+The Windows tray app connects to the Saxo OpenAPI, refreshes OAuth tokens while
+running, checks data each 30-minute slot, renders one 9-panel PNG per configured
+FX pair, and retains all folders from the last **8 hours OR the latest 16**.
+Tokens and App Secret are kept in the Windows user's Credential Manager, not in Git.
+
+The app uses the Saxo **Authorization Code** grant selected when the SIM app
+was registered. Confirm the exact Redirect URL in the Saxo Developer Portal:
+`http://localhost:8765/callback` is only a default, and it **must match** the
+registered URL. Saxo recommends PKCE for native apps; this local confidential
+client uses the already-registered Code grant and stores its secret in the
+Windows credential vault. This is intended for personal use on your own PC.
+
+### First checkout of the Saxo development branch
+
+This implementation is currently in **PR #3**, not `main`. To test it in
+your existing Windows checkout without modifying `main`:
+
+```bash
+git fetch origin
+git switch --track origin/feature/saxo-windows-local-20261010
+```
+
+If the feature branch already exists locally, use
+`git switch feature/saxo-windows-local-20261010` and
+`git pull --ff-only origin feature/saxo-windows-local-20261010`.
+After the Windows SIM test succeeds, PR #3 can be merged and normal
+`git pull --ff-only origin main` will retrieve the released version.
+
+### Initial one-time authentication (Windows Command Prompt)
+
+From your local `product_chat_record` directory:
+
+```bat
+python -m pip install -r requirements-windows.txt
+python -m src.saxo_auth configure --config setting.yaml
+python -m src.saxo_auth login --config setting.yaml
+```
+
+**Never paste the App Secret or OAuth tokens into a chat, setting.yaml,
+GitHub commits or screenshots.** The `configure` command asks for App Key and
+prompts for the App Secret without echoing it. `login` starts a loopback-only
+OAuth callback listener and opens Saxo in your browser once. If Windows sleeps
+or is shut down until the Refresh Token expires, click "Saxoに再ログイン" from the
+tray menu (or run the `login` command again).
+
+Update the **non-secret** settings in `setting.yaml`:
+
+```yaml
+saxo:
+  enabled: true  # switch on ONLY after local browser login
+  environment: sim
+  redirect_uri: http://localhost:8765/callback
+  price_side: bid
+local_monitor:
+  mode: saxo_local
+  poll_seconds: 60
+  chart_interval_minutes: 30
+  retention_hours: 8
+  min_folders: 16
+```
+
+While FX is open, run the first Saxo test locally:
+
+```bat
+python -m src.saxo_local --config setting.yaml
+```
+
+If the test succeeds, build and start the Windows tray app:
+
+```bat
+scripts\build_windows.bat
+dist\ChartRecorder.exe --config "%CD%\setting.yaml"
+```
+
+**Windows and LIVE Saxo connectivity have not yet been confirmed.** SIM data
+can be delayed or simulated. Only the read-only market-data endpoints are
+used; no trading permissions or order endpoints are required.
+
+Detailed implementation and outstanding verification:
+[docs/SAXO_LOCAL_IMPLEMENTATION_20261010.md](docs/SAXO_LOCAL_IMPLEMENTATION_20261010.md).
+
+### GitHub mode (legacy/test-only)
+
+The existing GitHub Artifact download mode is still available by setting
+`local_monitor.mode: github`, but it is **not required** for Saxo local mode.
+TradingView MCP live capture and the GitHub Actions 30-minute cron remain
+disabled. Existing test-only chart generation via `--demo` is unaffected.
+
 ## Quick start
 
 ```bash
@@ -50,9 +171,9 @@ the latest successful run, preventing closed-market runs from breaking downloads
 - After authorization, set `provider.enabled: true`, establish a secure renewable OAuth access token flow, and provide `TRADINGVIEW_MCP_ACCESS_TOKEN` as a **GitHub Actions secret**. An access token alone is not an unattended refresh strategy.
 - GitHub-hosted runners may start later than the scheduled time; exact 30-minute capture is not guaranteed.
 
-## Local Windows app (1-minute GitHub polling)
+## Legacy: GitHub Artifact download mode (1-minute polling)
 
-**Current limitation:** TradingView MCP unattended access has not yet been
+**Legacy GitHub mode only:** TradingView MCP unattended access has not yet been
 validated or enabled. Without successful chart-generation runs on GitHub, the
 Windows app will have no live images to download.
 
