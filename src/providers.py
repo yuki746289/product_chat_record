@@ -1,4 +1,5 @@
 # Created: 2026-10-09 22:09 JST
+# Updated: 2026-10-10 JST (verified response contract)
 """Demo generator and official TradingView MCP data adapter.
 
 Production auth is intentionally disabled until terms and OAuth token renewal
@@ -35,6 +36,8 @@ def validate_bars(df):
 
 def parse_mcp_response(result):
     """Read MCP tool result structuredContent or a JSON text block."""
+    if getattr(result, 'isError', False):
+        raise RuntimeError('TradingView MCP returned a tool error')
     structured = getattr(result, 'structuredContent', None)
     if structured is not None:
         payload = structured
@@ -46,6 +49,11 @@ def parse_mcp_response(result):
         payload = json.loads(parts[0])
     if isinstance(payload, dict) and 'result' in payload and isinstance(payload['result'], dict):
         payload = payload['result']
+    if isinstance(payload, dict) and payload.get('success') is False:
+        detail = payload.get('error') or payload.get('message') or 'unknown error'
+        raise RuntimeError(f'TradingView MCP returned success=false: {detail}')
+    if not isinstance(payload, (dict, list)):
+        raise ValueError('MCP response payload must be an object or list')
     bars = payload if isinstance(payload, list) else payload.get('bars', payload.get('data'))
     if not isinstance(bars, list) or not bars:
         raise ValueError('MCP response does not contain non-empty OHLCV bars; check live response schema')
@@ -57,6 +65,15 @@ def parse_mcp_response(result):
     if 'Volume' not in df.columns:
         df['Volume'] = 0.0
     return validate_bars(df)
+
+
+def choose_ohlcv_tool(tools):
+    """Discover actual MCP tool names instead of assuming a prefix."""
+    names = {getattr(tool, 'name', None) for tool in tools}
+    for candidate in ('mcp_tv_get_ohlcv', 'get_ohlcv'):
+        if candidate in names:
+            return candidate
+    raise RuntimeError('TradingView MCP get_ohlcv tool unavailable (check server list_tools)')
 
 
 def resample_8h(bars_4h):
@@ -101,6 +118,7 @@ class TradingViewMcpProvider:
     def __init__(self, url):
         self.url = url
         self.token = os.getenv('TRADINGVIEW_MCP_ACCESS_TOKEN', '')
+        self.tool_name = None
         if not self.token:
             raise RuntimeError('TRADINGVIEW_MCP_ACCESS_TOKEN is not configured; live mode is disabled')
 
@@ -114,11 +132,12 @@ class TradingViewMcpProvider:
         async with streamablehttp_client(self.url, headers=headers) as (read, write, _):
             async with ClientSession(read, write) as session:
                 await session.initialize()
-                result = await session.call_tool('get_ohlcv', arguments={
+                if self.tool_name is None:
+                    available = await session.list_tools()
+                    self.tool_name = choose_ohlcv_tool(available.tools)
+                result = await session.call_tool(self.tool_name, arguments={
                     'symbol':symbol, 'interval':INTERVALS[timeframe], 'count':count, 'summary':False
                 })
-                if result.isError:
-                    raise RuntimeError(f'TradingView MCP get_ohlcv failed: {symbol} {timeframe}')
                 return parse_mcp_response(result)
 
     def get(self, symbol, timeframe, count):
