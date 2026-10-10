@@ -10,7 +10,7 @@
 - **公式MCPの対話型利用と、GitHub Actionsによる30分ごとの無人取得は別の許諾問題。** 公式資料から後者の許可を確認できなかった。
 - TradingView公式の利用規約・サポート文書は、自動的なデータ収集や表示目的外の加工利用について制約を明示している。
 - PublicリポジトリのArtifactsに加工したチャート画像を保存・第三者が取得可能にする行為についても、許可範囲を確認する必要がある。
-- TradingViewアカウントの契約状況、実際のOAuthログイン、refresh_tokenの発行可否、無人更新の継続性は未検証。アカウント情報・トークン等はGitHubやチャットへ貼らないこと。
+- **契約プラン: TradingView Plus（ユーザー申告、2026-10-10）**。公式MCPのEssential以上というプラン条件を満たす見込み（無料トライアルでないことが条件）。OAuthログイン、refresh_tokenの発行可否、無人更新の継続性は未検証。アカウント情報・トークン等はGitHubやチャットへ貼らないこと。
 
 ## 公式ソース
 
@@ -43,7 +43,7 @@ Subject: Permission and authentication for unattended TradingView MCP usage
 
 Hello TradingView Support,
 
-I would like to use the official TradingView MCP server's `get_ohlcv` tool in a personal chart-recording project. A GitHub Actions workflow would run every 30 minutes, request OHLCV bars for several FX pairs across eight intervals (1m, 5m, 15m, 1h, 4h, 1D, 1W, M), compute EMA and RCI indicators in Python, and generate human-readable PNG charts. The charts would be temporarily stored as artifacts on a public GitHub repository and downloaded to my own Windows PC. No automated orders would be placed.
+I have a paid TradingView Plus subscription and would like to use the official TradingView MCP server's `get_ohlcv` tool in a personal chart-recording project. A GitHub Actions workflow would run every 30 minutes, request OHLCV bars for several FX pairs across eight intervals (1m, 5m, 15m, 1h, 4h, 1D, 1W, M), compute EMA and RCI indicators in Python, and generate human-readable PNG charts. The charts would be temporarily stored as artifacts on a public GitHub repository and downloaded to my own Windows PC. No automated orders would be placed.
 
 Could you confirm whether this unattended polling, data transformation, and public artifact storage are permitted under the TradingView MCP beta and market data license? If any part is not allowed, would it be permitted with private artifacts or a different agreement? Also, does the official MCP OAuth 2.1 flow support renewable, headless GitHub Actions authentication, and what limits apply?
 
