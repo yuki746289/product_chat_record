@@ -134,38 +134,45 @@ This checks once and exits. It uses the **same** download history and cleanup
 rules as the tray app; do not schedule both concurrently. Run the app instead
 for continuous 1-minute monitoring.
 
-## Updating setting.yaml and pushing to GitHub
+## Updating setting.yaml on main
 
-The PR work is on `feature/chart-recorder-initial-20261009`, **not** `main`.
-Work in this feature branch until the PR is reviewed and merged.
+The working branch for normal operation is **main**. After PR #1 is merged,
+use `main` for downloads and your local configuration updates.
 
-One-time checkout (Windows Command Prompt or PowerShell):
+One-time clone (Windows Command Prompt or PowerShell):
 
 ```bat
-git clone --branch feature/chart-recorder-initial-20261009 https://github.com/yuki746289/product_chat_record.git
+git clone https://github.com/yuki746289/product_chat_record.git
 cd product_chat_record
+git switch main
 ```
 
-**Before editing** `setting.yaml`, get the latest changes:
+If you previously cloned the feature branch, switch to `main` first:
 
 ```bat
-git switch feature/chart-recorder-initial-20261009
-git pull --ff-only origin feature/chart-recorder-initial-20261009
+git fetch origin
+git switch main
 ```
 
-Edit `setting.yaml`, then stage and push **only that file**:
+**Before editing** `setting.yaml`, fetch the latest `main`:
+
+```bat
+git pull --ff-only origin main
+```
+
+After editing, commit and push **only the settings file**:
 
 ```bat
 git status
 git add setting.yaml
 git commit -m "Update chart settings"
-git push origin feature/chart-recorder-initial-20261009
+git push origin main
 ```
 
-The repository's `setting.yaml` is public: **never write tokens or secrets**
-to it. Keep OAuth tokens in GitHub Secrets or local protected credentials.
-If `git pull --ff-only` refuses because of local commits or uncommitted
-changes, resolve the Git status first; do not force-push.
+The repository's `setting.yaml` is public: **never store OAuth tokens,
+passwords, or other secrets** in it. Keep credentials in GitHub Secrets or
+protected local storage. If `git pull --ff-only` fails, resolve your local
+changes before retrying; avoid force pushes.
 
 ## Fidelity limitations
 
