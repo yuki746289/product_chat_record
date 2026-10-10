@@ -65,9 +65,9 @@ Thank you.
 - 取得形式は `{success:true,format:'rows',bars:[{t,o,h,l,c,v}], count, has_more,...}`。時刻 `t` はUTCのUnix秒で昇順。4時間足440本に対してOHLCの整合性、時刻の重複・順序を検査して問題なかった。
 - 4時間足440本をUTC 0時基準で8時間足にまとめた結果、**205本**の完全な2本組が構成でき、チャート表示に必要な110本を確保できた。TradingView画面の8Hセッションとの一致は今後比較する必要がある。
 - コードの改善点は、`success:false` の明示的な検出と、MCPサーバーが提供する `mcp_tv_get_ohlcv` または `get_ohlcv` の実ツール名を `list_tools()` で判別すること。
-- GitHub側に加えた8件の契約テストでは、市場データの生値を使わず、実際のレスポンス形式と同じ構造の**合成データ**を利用する。ローカルで同等コードの8テストが成功した。
+- GitHub側に追加した8件の契約テストには、市場データの生値を使わず、実際のレスポンスと同じ形式の**合成データ**を用いた。**GitHub Actions実行 #38017598833 で既存テスト込み計26件成功**。合成データによるUSDJPY/EURUSD/GBPJPYのPNG作成・Artifactアップロードも成功。
 - **未検証:** GitHub ActionsからのPython MCP OAuth通信、アクセストークン更新、TradingView利用規約上の無人取得許諾、1つの実データ9画面画像としての通し処理、TradingView UIとのEMA/RCI数値照合。
-- 元の `provider.enabled: false` とコメントアウト済みの30分cronは維持する。
+- 元の `provider.enabled: false` とコメントアウト済みの30分cronは維持する。CI用に一時追加したpushトリガーはテスト完了後に削除済み。
 
 ## 既存実装の監査結果
 
