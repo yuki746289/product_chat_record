@@ -16,6 +16,31 @@ information panel. EMA: 20, 30, 40. RCI: 9, 14, 26.
 TradingView official MCP: https://www.tradingview.com/mcp/docs
 TradingView use policy: https://www.tradingview.com/policies/
 
+<!-- Created: 2026-10-10 JST -->
+## TradingView MCP: authorization and production readiness
+
+The official TradingView MCP offers OAuth 2.1 and read-only `get_ohlcv`, but
+**the intended 30-minute unattended GitHub Actions polling, image transformation,
+and Public Artifact sharing have not been confirmed as authorized uses**.
+See [`docs/TRADINGVIEW_MCP_AUTHORIZATION_REVIEW_20261010.md`](docs/TRADINGVIEW_MCP_AUTHORIZATION_REVIEW_20261010.md)
+for the official references, support questions, and controlled rollout checklist.
+
+**Do not** enable `provider.enabled: true` or the production cron schedule until
+TradingView expressly confirms the intended unattended use and the OAuth renewal
+mechanism is tested. Paid TradingView plan access alone is not permission for
+automated extraction. The account owner must authorize OAuth interactively; no
+credentials should be posted to GitHub, `setting.yaml`, or this chat.
+
+Interactive authentication supported by TradingView's official documentation
+(not a GitHub Actions login):
+
+1. In an eligible ChatGPT client, open Settings → Plugins → Add → MCPs → Add.
+2. Enter `https://mcp.tradingview.com/mcp` with Streamable HTTP.
+3. Authenticate with a paid TradingView account and approve the tool access.
+
+This verifies interactive access **only**. OAuth login in ChatGPT is not shared
+with GitHub Actions, which requires a separately authorized unattended flow.
+
 ## Quick start
 
 ```bash
