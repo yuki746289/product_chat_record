@@ -8,7 +8,7 @@
 | 3 | 2×5 chart / nine timeframes / info panel | Implemented; PNG smoke test passed |
 | 4 | EMA20/30/40 and RCI9/14/26 | Implemented; offline tests passed |
 | 5 | 8H UTC-aligned resampling | Implemented; TradingView cross-check pending |
-| 6 | Official MCP get_ohlcv adapter | Existing adapter only; live OAuth, token renewal, and response schema unverified |
+| 6 | Official MCP get_ohlcv adapter | Authenticated ChatGPT call and row schema verified; direct Python OAuth/token renewal not yet verified |
 | 7 | 30-minute production scheduled capture | HOLD: permission and unattended OAuth unverified |
 | 8 | 8-hour artifact cleanup | Implemented; GitHub Actions live validation pending |
 | 9 | One-shot Windows BAT image retrieval | Implemented; offline tests passed, Windows CLI validation pending |
@@ -21,7 +21,10 @@
 | 16 | README Git pull/push commands for main | Done |
 | 17 | Full regression suite | 18 tests passed in Linux environment |
 | 18 | TradingView official MCP documentation review | Done: 2026-10-10; official URL, OAuth, tool intervals confirmed |
-| 23 | TradingView subscription plan eligibility | Plus plan reported by user; Essential-or-above requirement satisfied subject to paid account validation |
+| 24 | USDJPY real MCP responses across 8 intervals | Done: 220 each plus 440 for 4H, row fields verified |
+| 25 | UTC-anchored 8H conversion from live 4H timestamps | Done: 205 valid buckets; TradingView UI anchor alignment remains pending |
+| 26 | MCP success/error and tool alias handling | Implemented; 8 targeted synthetic-contract tests passed offline |
+| 23 | TradingView subscription plan eligibility | Plus plan; ChatGPT MCP login and OHLCV retrieval verified |
 | 19 | TradingView unattended polling and derived-image rights | HOLD: documented permission not confirmed; request confirmation |
 | 20 | Public GitHub Artifact sharing rights | HOLD: potential third-party access/redistribution; request confirmation |
 | 21 | OAuth 2.1 browser authorization and renewable headless auth | HOLD: needs user login, provider OAuth grant verification |
