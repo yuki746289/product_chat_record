@@ -1,0 +1,1 @@
+One-time synthetic chart generation and regression tests for argument-free EXE startup. No Saxo live data.
