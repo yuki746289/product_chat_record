@@ -39,7 +39,7 @@ output:
 # Windows tray application; Saxo local mode needs initial OAuth login.
 # Do not store App Key, App Secret, or tokens in this public YAML.
 saxo:
-  enabled: false
+  enabled: true
   environment: sim
   redirect_uri: http://localhost:8765/callback
   price_side: bid
