@@ -1,7 +1,7 @@
 # Created: 2026-10-10 10:35 JST
 """GitHub artifact downloader and conservative local retention for Windows.
 
-Runs one polling pass; UI and BAT can both call poll_once(). No background jobs
+Runs one polling pass; UI and Python CLI can call poll_once(). No background jobs
 are created by this module. All times are timezone-aware.
 """
 from datetime import datetime, timedelta, timezone

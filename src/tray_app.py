@@ -1,4 +1,5 @@
 # Created: 2026-10-10 10:39 JST
+# Updated: 2026-10-10 JST (argument-free EXE config discovery)
 """Windows system-tray watcher for Chart Recorder (no global background daemon)."""
 import argparse
 import ctypes
@@ -21,9 +22,18 @@ REGISTRY_KEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
 
 
 def default_config():
-    # A PyInstaller executable reads editable setting.yaml beside the EXE.
-    base = Path(sys.executable).resolve().parent if getattr(sys, "frozen", False) else Path(__file__).resolve().parents[1]
-    return base / "setting.yaml"
+    """Locate the editable configuration without requiring --config.
+
+    A packaged EXE is built at <repo>/dist/ChartRecorder.exe. It must read
+    <repo>/setting.yaml, not a potentially outdated dist/setting.yaml copy.
+    A standalone executable outside a dist directory uses a neighboring file.
+    """
+    if getattr(sys, "frozen", False):
+        exe_dir = Path(sys.executable).resolve().parent
+        if exe_dir.name.lower() == "dist":
+            return exe_dir.parent / "setting.yaml"
+        return exe_dir / "setting.yaml"
+    return Path(__file__).resolve().parents[1] / "setting.yaml"
 
 
 def _startup_command(config_path):
