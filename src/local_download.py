@@ -1,5 +1,5 @@
 # Created: 2026-10-10 10:35 JST
-"""One-shot local download command used by the existing BAT fallback."""
+"""Legacy one-shot GitHub Artifact downloader (optional Python CLI)."""
 import argparse
 from .local_monitor import poll_once
 

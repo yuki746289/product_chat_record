@@ -61,21 +61,17 @@ registered URL. Saxo recommends PKCE for native apps; this local confidential
 client uses the already-registered Code grant and stores its secret in the
 Windows credential vault. This is intended for personal use on your own PC.
 
-### First checkout of the Saxo development branch
+### Sync your local main branch
 
-This implementation is currently in **PR #3**, not `main`. To test it in
-your existing Windows checkout without modifying `main`:
+The Saxo local mode is already merged into `main`. From the repository root:
 
 ```bash
-git fetch origin
-git switch --track origin/feature/saxo-windows-local-20261010
+git switch main
+git pull --ff-only origin main
 ```
 
-If the feature branch already exists locally, use
-`git switch feature/saxo-windows-local-20261010` and
-`git pull --ff-only origin feature/saxo-windows-local-20261010`.
-After the Windows SIM test succeeds, PR #3 can be merged and normal
-`git pull --ff-only origin main` will retrieve the released version.
+Check `git status` before switching or pulling; resolve local modifications
+first rather than discarding them.
 
 ### Initial one-time authentication (Windows Command Prompt)
 
@@ -120,8 +116,21 @@ If the test succeeds, build and start the Windows tray app:
 
 ```bat
 scripts\build_windows.bat
-dist\ChartRecorder.exe --config "%CD%\setting.yaml"
+dist\ChartRecorder.exe
 ```
+
+Or launch it in Git Bash with **no arguments**:
+
+```bash
+./dist/ChartRecorder.exe
+```
+
+The EXE at `dist/ChartRecorder.exe` automatically uses the Git-managed
+`setting.yaml` **one directory above `dist`**. This works even if started
+from another working directory or double-clicked in Explorer. An outdated
+`dist/setting.yaml` file is ignored. The build no longer copies a second
+settings file into `dist`. Use `--config PATH` only if deliberately running
+with a nonstandard settings path.
 
 **Windows and LIVE Saxo connectivity have not yet been confirmed.** SIM data
 can be delayed or simulated. Only the read-only market-data endpoints are
@@ -188,18 +197,10 @@ Build a Windows `.exe` **on a Windows PC** (not Linux):
 scripts\build_windows.bat
 ```
 
-This creates `dist\ChartRecorder.exe` and, if absent, `dist\setting.yaml`.
-Edit the copy of `dist\setting.yaml` for that executable (in particular,
-`output.local_dir`). The EXE reads this external file, not an embedded copy.
-To use the **repository's** editable `setting.yaml` directly (so Git
-pull/push updates and the app use the same file), run from the repository root:
-
-```bat
-dist\ChartRecorder.exe --config "%CD%\setting.yaml"
-```
-
-Alternatively, double-click `dist\ChartRecorder.exe` to use the adjacent
-`dist\setting.yaml` (a **separate copy** that does not change with Git pulls).
+This builds `dist\ChartRecorder.exe`, which automatically uses the
+repository-root `setting.yaml`. It does not create a separate `dist\setting.yaml`.
+If a copy from an older build exists in `dist`, it will **not** be read.
+Double-click the EXE or run `./dist/ChartRecorder.exe` without arguments.
 Restart the app after changing `local_monitor.poll_seconds` or `output.local_dir`.
 
 Launch the EXE once; it stays in the Windows system tray,
@@ -245,15 +246,17 @@ The 8-hour retention applies to local files; GitHub currently keeps its
 Artifacts for one day unless cleanup is run (the automated cleanup cron is
 currently disabled).
 
-### Manual BAT download (fallback)
+### Manual legacy download (Python only)
+
+The unused `scripts/download_charts.bat` wrapper has been removed. If the
+legacy GitHub Artifact mode is ever needed for debugging, its one-shot Python
+command remains:
 
 ```bat
-scripts\download_charts.bat
+python -m src.local_download --config setting.yaml
 ```
 
-This checks once and exits. It uses the **same** download history and cleanup
-rules as the tray app; do not schedule both concurrently. Run the app instead
-for continuous 1-minute monitoring.
+The default `saxo_local` mode does not need this command or GitHub CLI.
 
 ## Updating setting.yaml on main
 
