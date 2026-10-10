@@ -70,7 +70,18 @@ scripts\build_windows.bat
 This creates `dist\ChartRecorder.exe` and, if absent, `dist\setting.yaml`.
 Edit the copy of `dist\setting.yaml` for that executable (in particular,
 `output.local_dir`). The EXE reads this external file, not an embedded copy.
-Launch `dist\ChartRecorder.exe` once; it stays in the Windows system tray,
+To use the **repository's** editable `setting.yaml` directly (so Git
+pull/push updates and the app use the same file), run from the repository root:
+
+```bat
+dist\ChartRecorder.exe --config "%CD%\setting.yaml"
+```
+
+Alternatively, double-click `dist\ChartRecorder.exe` to use the adjacent
+`dist\setting.yaml` (a **separate copy** that does not change with Git pulls).
+Restart the app after changing `local_monitor.poll_seconds` or `output.local_dir`.
+
+Launch the EXE once; it stays in the Windows system tray,
 checking GitHub every **60 seconds**. From its right-click menu you can poll
 now, pause, open the output directory, enable start-at-login (for built EXE
 only), or exit. Start-at-login uses the **current user's** Windows registry,
