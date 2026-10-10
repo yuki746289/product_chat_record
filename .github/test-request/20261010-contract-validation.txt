@@ -1,2 +1,0 @@
-Synthetic-only request for 2026-10-10 MCP parser contract regression testing.
-No live TradingView OAuth/data collection. Remove after check.
