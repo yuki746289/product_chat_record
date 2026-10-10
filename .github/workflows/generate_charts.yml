@@ -3,6 +3,11 @@
 # and TradingView's written approval for 30-minute unattended processing.
 name: Generate Charts
 on:
+  # TEMPORARY synthetic-only categorized FX regression test
+  push:
+    branches: ['feature/saxo-windows-local-20261010']
+    paths:
+      - '.github/test-request/*.txt'
   workflow_dispatch:
     inputs:
       demo:
@@ -30,7 +35,7 @@ jobs:
       - name: Generate images
         env:
           TRADINGVIEW_MCP_ACCESS_TOKEN: ${{ secrets.TRADINGVIEW_MCP_ACCESS_TOKEN }}
-          DEMO: ${{ inputs.demo }}
+          DEMO: ${{ github.event_name == 'push' && 'true' || inputs.demo }}
         run: |
           if [ "$DEMO" = 'true' ]; then
             python -m src.main --demo
