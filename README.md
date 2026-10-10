@@ -125,9 +125,9 @@ the latest successful run, preventing closed-market runs from breaking downloads
 - After authorization, set `provider.enabled: true`, establish a secure renewable OAuth access token flow, and provide `TRADINGVIEW_MCP_ACCESS_TOKEN` as a **GitHub Actions secret**. An access token alone is not an unattended refresh strategy.
 - GitHub-hosted runners may start later than the scheduled time; exact 30-minute capture is not guaranteed.
 
-## Local Windows app (1-minute GitHub polling)
+## Legacy: GitHub Artifact download mode (1-minute polling)
 
-**Current limitation:** TradingView MCP unattended access has not yet been
+**Legacy GitHub mode only:** TradingView MCP unattended access has not yet been
 validated or enabled. Without successful chart-generation runs on GitHub, the
 Windows app will have no live images to download.
 
