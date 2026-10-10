@@ -9,7 +9,7 @@ import pytest
 from src.config import load_settings, EXPECTED_TIMEFRAMES
 from src.indicators import add_indicators
 from src.providers import DemoProvider, parse_mcp_response, resample_8h
-from src.main import generate
+from src.main import generate, is_fresh_minute_candle
 from src.local_download import find_batch_folder
 from scripts.cleanup_artifacts import is_expired
 
@@ -75,3 +75,62 @@ def test_render_offline(tmp_path):
     with Image.open(out[0]) as im:
         assert im.format == 'PNG'
         assert im.width > 400 and im.height > 400
+
+
+def test_minute_candle_freshness_gate():
+    now = pd.Timestamp('2026-10-10T12:00:00Z')
+    def frame(t):
+        return pd.DataFrame({'Close':[1.0]}, index=pd.DatetimeIndex([pd.Timestamp(t)]))
+    assert is_fresh_minute_candle(frame('2026-10-10T11:55:00Z'), now, 10)
+    assert is_fresh_minute_candle(frame('2026-10-10T11:50:00Z'), now, 10)
+    assert not is_fresh_minute_candle(frame('2026-10-10T11:49:00Z'), now, 10)
+    assert not is_fresh_minute_candle(frame('2026-10-10T12:03:00Z'), now, 10)
+    empty = pd.DataFrame(index=pd.DatetimeIndex([], tz='UTC'))
+    assert not is_fresh_minute_candle(empty, now, 10)
+
+
+def test_skip_closed_market_before_fetching_other_timeframes(tmp_path, monkeypatch):
+    import yaml
+    from src.providers import DemoProvider
+    cfg = load_settings(SETTINGS)
+    cfg['provider']['enabled'] = True
+    cfg['symbols'] = cfg['symbols'][:1]
+    temp_cfg = tmp_path / 'setting.yaml'
+    temp_cfg.write_text(yaml.safe_dump(cfg), encoding='utf-8')
+    calls=[]
+    class StubProvider:
+        def __init__(self, url):
+            self.url=url
+        def get(self, symbol, timeframe, count):
+            calls.append(timeframe)
+            return DemoProvider().get(symbol, timeframe, count)
+    monkeypatch.setattr('src.main.TradingViewMcpProvider', StubProvider)
+    result = generate(temp_cfg, demo=False, now_utc=pd.Timestamp('2026-10-10T12:00:00Z'),
+                      output_override=tmp_path / 'out')
+    assert result == []
+    assert calls == ['1M']
+    assert not list((tmp_path/'out').rglob('*.png'))
+
+
+def test_fresh_market_renders_chart_and_fetches_minute_once(tmp_path, monkeypatch):
+    import yaml
+    from src.providers import DemoProvider
+    cfg = load_settings(SETTINGS)
+    cfg['provider']['enabled'] = True
+    cfg['symbols'] = cfg['symbols'][:1]
+    cfg['chart']['dpi'] = 45
+    cfg['chart']['figsize'] = [12, 16]
+    temp_cfg = tmp_path / 'setting.yaml'
+    temp_cfg.write_text(yaml.safe_dump(cfg), encoding='utf-8')
+    calls=[]
+    class StubProvider:
+        def __init__(self, url):
+            pass
+        def get(self, symbol, timeframe, count):
+            calls.append(timeframe)
+            return DemoProvider().get(symbol, timeframe, count)
+    monkeypatch.setattr('src.main.TradingViewMcpProvider', StubProvider)
+    result = generate(temp_cfg, demo=False, now_utc=pd.Timestamp('2026-10-09T00:03:00Z'),
+                      output_override=tmp_path/'out')
+    assert len(result) == 1 and result[0].is_file()
+    assert calls.count('1M') == 1

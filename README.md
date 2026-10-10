@@ -26,7 +26,22 @@ python -m src.main --demo
 
 Demo output: `output/YYYYMMDD_HHMM/USDJPY.png` etc. Demo content is labelled **SYNTHETIC DEMO DATA**.
 
-Change currency pairs, TradingView `EXCHANGE:SYMBOL` identifiers and local download directory in `setting.yaml`.
+Change currency pairs, TradingView `EXCHANGE:SYMBOL` identifiers, local download directory, and right-side chart padding (`chart.right_padding_bars`, default `12`) in `setting.yaml`.
+
+## When the market is closed
+
+Live mode checks the timestamp of the most recent **1M** candle before fetching
+other intervals. When it is older than `market.max_1m_age_minutes` (default
+**10 minutes**) or implausibly future-dated, that currency pair is **skipped**.
+If no currency pair has recent data, the workflow uploads **no Artifact**.
+Other pairs may still produce images. Demo mode deliberately bypasses this check.
+
+This is a **data freshness** check, not an exact holiday calendar. There is a
+short grace period after market close; delayed vendor feeds may also result in
+skips, so verify timestamps and adjust the threshold with actual MCP data.
+Network errors remain errors rather than being mislabeled as holidays.
+Windows downloads select the latest existing nonexpired artifact rather than
+the latest successful run, preventing closed-market runs from breaking downloads.
 
 ## GitHub Actions
 

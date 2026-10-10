@@ -29,10 +29,14 @@ def download(settings):
     repo = cfg['repository']
     local_root = Path(cfg['output']['local_dir'])
     last_file = local_root / '.last_successful_run'
-    run_id = _gh('run', 'list', '-R', repo, '--workflow', 'generate_charts.yml',
-                 '--status', 'success', '--limit', '1', '--json', 'databaseId', '--jq', '.[0].databaseId')
+    # Successful closed-market runs deliberately have no artifacts.
+    # Pick the newest available, nonexpired named artifact instead.
+    name = cfg['output']['artifact_name']
+    query = (f'[.artifacts[] | select(.name == "{name}" and .expired == false)] '
+             '| sort_by(.created_at) | reverse | .[0].workflow_run.id // empty')
+    run_id = _gh('api', f'repos/{repo}/actions/artifacts?per_page=100', '--jq', query)
     if not run_id or not run_id.isdigit():
-        print('No successful workflow run found')
+        print('No available chart artifact (no update yet, or expired)')
         return None
     if last_file.is_file() and last_file.read_text(encoding='utf-8').strip() == run_id:
         print('No new images')

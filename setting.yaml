@@ -13,6 +13,9 @@ symbols:
     tradingview: FX:EURUSD
   - pair: GBPJPY
     tradingview: FX:GBPJPY
+market:
+  skip_stale: true
+  max_1m_age_minutes: 10  # Data freshness check; not an exchange holiday calendar.
 chart:
   timeframes: [1M, 5M, 15M, 1H, 4H, 8H, 1D, 1W, 1Mn]
   ema: [20, 30, 40]
@@ -20,6 +23,7 @@ chart:
   columns: 2
   bars: 110
   history_bars: 220
+  right_padding_bars: 12
   dpi: 110
   figsize: [19, 25]
   timezone: Asia/Tokyo

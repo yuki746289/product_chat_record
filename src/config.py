@@ -33,6 +33,15 @@ def load_settings(path):
             raise ValueError(f'chart.{key} must be {vals}')
     if int(chart.get('bars', 0)) < 42 or int(chart.get('history_bars', 0)) < 100:
         raise ValueError('insufficient chart/history bars')
+    market = cfg.setdefault('market', {})
+    market.setdefault('skip_stale', True)
+    market.setdefault('max_1m_age_minutes', 10)
+    if not isinstance(market['skip_stale'], bool):
+        raise ValueError('market.skip_stale must be boolean')
+    if (isinstance(market['max_1m_age_minutes'], bool)
+            or not isinstance(market['max_1m_age_minutes'], int)
+            or not 1 <= market['max_1m_age_minutes'] <= 30):
+        raise ValueError('market.max_1m_age_minutes must be an integer from 1 to 30')
     if cfg.get('provider', {}).get('type') != 'tradingview_mcp':
         raise ValueError('provider.type must be tradingview_mcp; demo uses --demo')
     if cfg.get('output', {}).get('retention_hours') != 8:

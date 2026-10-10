@@ -37,7 +37,18 @@ jobs:
           else
             python -m src.main
           fi
+      - name: Check image output
+        id: images
+        shell: bash
+        run: |
+          if [ -d output ] && find output -type f -name '*.png' -print -quit | grep -q .; then
+            echo 'has_images=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'has_images=false' >> "$GITHUB_OUTPUT"
+            echo 'No fresh market data: no image artifact created.'
+          fi
       - name: Upload charts artifact
+        if: steps.images.outputs.has_images == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: charts

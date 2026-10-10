@@ -31,6 +31,7 @@ def _axes_style(ax):
 
 def render_pair(bars, pair, dest, cfg, timestamp, demo=False):
     chart = cfg['chart']
+    right_padding_bars = max(0, int(chart.get('right_padding_bars', 12)))
     fig = plt.figure(figsize=tuple(chart['figsize']), facecolor=BG)
     outer = fig.add_gridspec(5, 2, top=.965, bottom=.032, left=.025, right=.975,
                             hspace=.33, wspace=.15)
@@ -58,7 +59,7 @@ def render_pair(bars, pair, dest, cfg, timestamp, demo=False):
         osc.set_yticks([-100, 0, 100])
         osc.axhline(80, color='#666b76', linewidth=.7, linestyle='--')
         osc.axhline(-80, color='#666b76', linewidth=.7, linestyle='--')
-        ax.set_xlim(-1, len(data))
+        ax.set_xlim(-1, (len(data) - 1) + right_padding_bars)
         ax.yaxis.set_major_locator(MaxNLocator(5))
         ax.set_title(f'{tf}  |  Close: {cl[-1]:.5f}', loc='left', color=FG, fontsize=10, pad=4)
         ax.legend(loc='upper left', fontsize=6, frameon=False, labelcolor=FG, ncol=3,
@@ -75,6 +76,7 @@ def render_pair(bars, pair, dest, cfg, timestamp, demo=False):
         f'GENERATED       {timestamp} JST', 'TIMEFRAMES       9',
         'EMA                   20 / 30 / 40', 'RCI                      9 / 14 / 26',
         'LAYOUT             2 columns / 5 rows',
+        f'RIGHT MARGIN   {right_padding_bars} bars',
         '8H BAR              UTC-anchored 4H aggregation',
         'SOURCE             ' + ('SYNTHETIC DEMO (NOT MARKET DATA)' if demo else 'TradingView MCP'),
         '', 'Times and calculations may differ from TradingView UI',
