@@ -19,11 +19,11 @@
 | 14 | Backfill, deduplication, and interrupted-download retry | Implemented; offline mock GitHub tests passed |
 | 15 | Windows EXE build and autostart registry behavior | Implemented; Windows executable build/run verification pending |
 | 16 | README Git pull/push commands for main | Done |
-| 17 | Full regression suite | 18 tests passed in Linux environment |
+| 17 | Full regression suite | 26 tests passed in GitHub Actions (2026-10-10 synthetic run 38017598833) |
 | 18 | TradingView official MCP documentation review | Done: 2026-10-10; official URL, OAuth, tool intervals confirmed |
 | 24 | USDJPY real MCP responses across 8 intervals | Done: 220 each plus 440 for 4H, row fields verified |
 | 25 | UTC-anchored 8H conversion from live 4H timestamps | Done: 205 valid buckets; TradingView UI anchor alignment remains pending |
-| 26 | MCP success/error and tool alias handling | Implemented; 8 targeted synthetic-contract tests passed offline |
+| 26 | MCP success/error and tool alias handling | Implemented; 8 contract tests and full 26-test CI run passed |
 | 23 | TradingView subscription plan eligibility | Plus plan; ChatGPT MCP login and OHLCV retrieval verified |
 | 19 | TradingView unattended polling and derived-image rights | HOLD: documented permission not confirmed; request confirmation |
 | 20 | Public GitHub Artifact sharing rights | HOLD: potential third-party access/redistribution; request confirmation |
