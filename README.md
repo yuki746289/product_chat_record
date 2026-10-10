@@ -16,6 +16,36 @@ information panel. EMA: 20, 30, 40. RCI: 9, 14, 26.
 TradingView official MCP: https://www.tradingview.com/mcp/docs
 TradingView use policy: https://www.tradingview.com/policies/
 
+
+## Saxo FX category folders (default configuration)
+
+The public `setting.yaml` contains **13 FX pairs**, written as one inline YAML
+mapping per pair, grouped as `cross_non_jpy` (7 pairs) and `cross_jpy` (6 pairs).
+`ERUJPY` was corrected to `EURJPY`. Indices, metals and cryptocurrency
+instruments are not included.
+
+In Saxo local mode, files are written to:
+
+```text
+C:/TradingViewCharts/
+  YYYYMMDD_HHmm/
+    cross_non_jpy/
+      GBPAUD.png  AUDUSD.png  GBPUSD.png  EURGBP.png
+      USDCAD.png  EURUSD.png  GBPNZD.png
+    cross_jpy/
+      AUDJPY.png  GBPJPY.png  USDJPY.png
+      EURJPY.png  CADJPY.png  NZDJPY.png
+```
+
+Retention is evaluated at the timestamp-folder level: preserve **every folder
+within 8 hours or the newest 16 timestamp folders**, then delete older batches.
+Existing top-level timestamp folders with PNGs are also recognized. The legacy
+GitHub Artifact downloader accepts both category-layout and flat images.
+
+After pulling an updated `setting.yaml`, restart the Windows tray app so
+that the expanded symbol list takes effect. Tokens and App Secret remain only
+in Windows Credential Manager.
+
 ## Recommended: Saxo local Windows mode (SIM-first)
 
 **No GitHub Actions or GitHub CLI is needed for chart generation in this mode.**

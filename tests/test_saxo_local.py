@@ -136,8 +136,8 @@ def test_local_halfhour_generation_and_dedupe(tmp_path,monkeypatch):
         return dest
     monkeypatch.setattr(saxo_local,'render_pair',fake_render)
     a=tick_once(cp,now,provider)
-    assert len(a)==1 and a[0].is_file() and a[0].parent.name=='20261009_1500'
-    assert len(provider.calls)==9 and ('USDJPY','8H') in provider.calls
+    assert len(a)==1 and a[0].is_file() and a[0].parent.parent.name=='20261009_1500'
+    assert len(provider.calls)==9 and ('GBPAUD','8H') in provider.calls
     assert calls[0][2]['source_label']=='Saxo SIM BID'
     assert tick_once(cp,now+timedelta(minutes=1),provider)==[]
     assert len(provider.calls)==9  # no extra market requests on same slot
@@ -153,7 +153,7 @@ def test_local_closed_market_makes_no_png(tmp_path):
     src=_stub_source(now,has_new=False)
     assert tick_once(cp,now,src)==[]
     assert not list((tmp_path/'output').rglob('*.png'))
-    assert src.calls==[('USDJPY','1M')]
+    assert src.calls==[('GBPAUD','1M')]
 
 
 def test_full_saxo_snapshot_creates_valid_png(tmp_path):

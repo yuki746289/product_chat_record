@@ -53,7 +53,9 @@ def generate(settings, timestamp=None, demo=False, output_override=None, now_utc
                 bars[tf] = provider.get(item['tradingview'], tf, cfg['chart']['history_bars'] * (2 if tf == '4H' else 1))
             if len(bars[tf]) < cfg['chart']['bars']:
                 raise RuntimeError(f'{item["pair"]} {tf}: insufficient candles ({len(bars[tf])})')
-        dst = render_pair(bars, item['pair'], out / f'{item["pair"]}.png', cfg, folder_time, demo=demo)
+        category=item.get('category')
+        image_dir=out/category if category else out
+        dst = render_pair(bars, item['pair'], image_dir / f'{item["pair"]}.png', cfg, folder_time, demo=demo)
         print(f'Generated: {dst}', flush=True)
         outputs.append(dst)
     if not outputs:

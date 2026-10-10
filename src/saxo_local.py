@@ -89,7 +89,8 @@ def tick_once(config_path, now=None, provider=None):
                         frames[tf]=source.get(pair,tf,cfg['chart']['history_bars'])
                     if len(frames[tf])<cfg['chart']['bars']:
                         raise ValueError(f'{pair} {tf}: insufficient candles')
-                path=folder/(pair+'.png')
+                category=item.get('category', 'uncategorized')
+                path=folder/category/(pair+'.png')
                 render_pair(frames,pair,path,cfg,stamp,
                             source_label=f"Saxo {sax['environment'].upper()} {sax['price_side'].upper()}",
                             eight_hour_label='Saxo native 8H')

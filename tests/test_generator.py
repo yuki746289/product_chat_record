@@ -70,7 +70,8 @@ def test_render_offline(tmp_path):
     cfg['chart']['figsize'] = [12, 16]
     tmpcfg = tmp_path/'setting.yaml'; tmpcfg.write_text(yaml.safe_dump(cfg), encoding='utf-8')
     out = generate(tmpcfg, timestamp='20261009_2200', demo=True, output_override=tmp_path/'output')
-    assert len(out) == 1 and out[0].name == 'USDJPY.png'
+    assert len(out) == 1 and out[0].name == 'GBPAUD.png'
+    assert out[0].parent.name == 'cross_non_jpy'
     from PIL import Image
     with Image.open(out[0]) as im:
         assert im.format == 'PNG'
