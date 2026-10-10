@@ -3,3 +3,7 @@
 pystray>=0.19,<1
 Pillow>=11,<13
 pyinstaller>=6,<8
+
+# Saxo OAuth and Windows Credential Manager
+requests>=2.32,<3
+keyring>=25,<27

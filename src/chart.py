@@ -29,7 +29,7 @@ def _axes_style(ax):
     ax.set_axisbelow(True)
 
 
-def render_pair(bars, pair, dest, cfg, timestamp, demo=False):
+def render_pair(bars, pair, dest, cfg, timestamp, demo=False, source_label=None, eight_hour_label=None):
     chart = cfg['chart']
     right_padding_bars = max(0, int(chart.get('right_padding_bars', 12)))
     fig = plt.figure(figsize=tuple(chart['figsize']), facecolor=BG)
@@ -77,8 +77,8 @@ def render_pair(bars, pair, dest, cfg, timestamp, demo=False):
         'EMA                   20 / 30 / 40', 'RCI                      9 / 14 / 26',
         'LAYOUT             2 columns / 5 rows',
         f'RIGHT MARGIN   {right_padding_bars} bars',
-        '8H BAR              UTC-anchored 4H aggregation',
-        'SOURCE             ' + ('SYNTHETIC DEMO (NOT MARKET DATA)' if demo else 'TradingView MCP'),
+        '8H BAR              ' + (eight_hour_label or 'UTC-anchored 4H aggregation'),
+        'SOURCE             ' + ('SYNTHETIC DEMO (NOT MARKET DATA)' if demo else (source_label or 'TradingView MCP')),
         '', 'Times and calculations may differ from TradingView UI',
     ]
     info.text(.08, .88, '\n'.join(details), color=FG, fontsize=10, linespacing=1.7,

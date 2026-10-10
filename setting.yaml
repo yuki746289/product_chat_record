@@ -36,8 +36,16 @@ output:
   artifact_name: charts
   retention_hours: 8
 
-# Windows tray application: polls GitHub while running.
+# Windows tray application; Saxo local mode needs initial OAuth login.
+# Do not store App Key, App Secret, or tokens in this public YAML.
+saxo:
+  enabled: false
+  environment: sim
+  redirect_uri: http://localhost:8765/callback
+  price_side: bid
 local_monitor:
+  mode: saxo_local
   poll_seconds: 60
+  chart_interval_minutes: 30
   retention_hours: 8
   min_folders: 16
