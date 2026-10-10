@@ -3,11 +3,6 @@
 # and TradingView's written approval for 30-minute unattended processing.
 name: Generate Charts
 on:
-  # Temporary smoke test: a commit to this exact folder triggers demo only.
-  push:
-    branches: [main]
-    paths:
-      - '.github/manual-run/*.txt'
   workflow_dispatch:
     inputs:
       demo:
@@ -35,7 +30,7 @@ jobs:
       - name: Generate images
         env:
           TRADINGVIEW_MCP_ACCESS_TOKEN: ${{ secrets.TRADINGVIEW_MCP_ACCESS_TOKEN }}
-          DEMO: ${{ github.event_name == 'push' && 'true' || inputs.demo }}
+          DEMO: ${{ inputs.demo }}
         run: |
           if [ "$DEMO" = 'true' ]; then
             python -m src.main --demo
