@@ -1,5 +1,6 @@
 # Created: 2026-10-10 10:39 JST
 # Updated: 2026-10-10 JST (argument-free EXE config discovery)
+# Updated: 2026-10-12 JST (Saxo re-login notification and recovery)
 """Windows system-tray watcher for Chart Recorder (no global background daemon)."""
 import argparse
 import ctypes
@@ -15,7 +16,7 @@ import time
 from .config import load_settings
 from .local_monitor import get_monitor_options, poll_once
 from .saxo_local import tick_once
-from .saxo_auth import SaxoSession
+from .saxo_auth import SaxoSession, SaxoLoginRequired
 
 APP_NAME = "ChartRecorder"
 REGISTRY_KEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
@@ -89,6 +90,9 @@ class TrayController:
         self.stopping = threading.Event()
         self.wake = threading.Event()
         self.paused = False
+        self.login_required = False
+        self.login_in_progress = False
+        self.auth_notice_sent = False
         self.status = "起動中"
         self.icon = None
         self.single_instance_handle = None
@@ -108,9 +112,31 @@ class TrayController:
         if self.icon:
             self.icon.update_menu()
 
+    def _signal_saxo_login_required(self):
+        """Show the Windows notification once, keeping tray status visible."""
+        if not self.login_required:
+            # Tokens are never logged; no repeated tracebacks every minute.
+            self.logger.warning("Saxo re-login required; use the tray menu to authenticate")
+            self.login_required = True
+        self._status("Saxo再ログインが必要（右クリック）")
+        if not self.auth_notice_sent and self.icon is not None:
+            try:
+                self.icon.notify(
+                    "Saxo認証が期限切れです。ChartRecorderを右クリックして「Saxoに再ログイン」を選んでください。",
+                    "ChartRecorder：再ログインが必要",
+                )
+                self.auth_notice_sent = True
+            except Exception:
+                # Windows notifications can be disabled; tray menu still works.
+                pass
+
     def poll_loop(self):
         while not self.stopping.is_set():
-            if not self.paused:
+            if self.login_required:
+                # Retry notice only if Windows was unable to show it earlier.
+                if not self.login_in_progress:
+                    self._signal_saxo_login_required()
+            elif not self.paused:
                 try:
                     if self.mode == "saxo_local":
                         self._status("Saxo確認中")
@@ -128,6 +154,8 @@ class TrayController:
                             self.logger.info("Downloaded %s snapshots", len(result))
                         else:
                             self._status("最新データ取得済み")
+                except SaxoLoginRequired:
+                    self._signal_saxo_login_required()
                 except Exception:
                     self.logger.exception("Polling error")
                     self._status("エラー（ログを確認）")
@@ -153,45 +181,61 @@ class TrayController:
             pystray.MenuItem(lambda _: f"状態: {self.status}", None, enabled=False),
             pystray.MenuItem("今すぐ確認", lambda icon, item: self.wake.set()),
             pystray.MenuItem("監視を一時停止", self.toggle_pause, checked=lambda _: self.paused),
-            pystray.MenuItem("Saxoに再ログイン", self.start_saxo_login,
-                             enabled=lambda _: self.mode == "saxo_local"),
+            pystray.MenuItem(
+                lambda _: "Saxoに再ログイン【必要】" if self.login_required else "Saxoに再ログイン",
+                self.start_saxo_login,
+                enabled=lambda _: self.mode == "saxo_local" and not self.login_in_progress,
+            ),
             pystray.MenuItem("保存先を開く", self.open_folder),
             pystray.MenuItem("Windowsログオン時に起動", self.toggle_autostart,
                              checked=lambda _: is_autostart_enabled(),
                              enabled=lambda _: os.name == "nt" and getattr(sys, "frozen", False)),
             pystray.MenuItem("終了", self.stop),
         )
-        self.worker = threading.Thread(target=self.poll_loop, name="ChartLocalPolling", daemon=True)
-        self.worker.start()
+        def start_polling(icon):
+            # pystray calls setup after the icon becomes ready for notifications.
+            if not self.stopping.is_set():
+                self.worker = threading.Thread(target=self.poll_loop, name="ChartLocalPolling", daemon=True)
+                self.worker.start()
+
         try:
-            self.icon.run()
+            self.icon.run(setup=start_polling)
         finally:
             self.stopping.set()
             self.wake.set()
-            self.worker.join(timeout=5)
+            if self.worker is not None:
+                self.worker.join(timeout=5)
             if self.single_instance_handle is not None:
                 self.kernel32.CloseHandle(self.single_instance_handle)
 
     def start_saxo_login(self, icon, item):
-        # The login operation must not block the Windows tray UI thread.
-        if self.mode != "saxo_local":
+        if self.mode != "saxo_local" or self.login_in_progress:
             return
+        self.login_in_progress = True
         self.paused = True
-        self._status("Saxo認証待ち（ブラウザでログイン）")
+        self._status("Saxo再ログイン中（ブラウザで認証）")
+        # Browser login must never block the tray UI thread.
+        threading.Thread(target=self._run_saxo_login, daemon=True, name="SaxoBrowserLogin").start()
 
-        def login():
-            try:
-                session = SaxoSession(load_settings(self.config_path))
-                session.sign_in_interactively()
-                self._status("Saxo認証完了")
-                self.logger.info("Saxo OAuth login completed")
-            except Exception:
-                self.logger.exception("Saxo browser login failed")
+    def _run_saxo_login(self):
+        try:
+            session = SaxoSession(load_settings(self.config_path))
+            session.sign_in_interactively()
+            self.login_required = False
+            self.auth_notice_sent = False
+            self._status("Saxo認証完了（画像取得を再開）")
+            self.logger.info("Saxo OAuth login completed; chart polling resumes")
+        except Exception:
+            self.logger.exception("Saxo browser login failed")
+            if self.login_required:
+                self._status("Saxo再ログイン失敗（右クリックして再試行）")
+            else:
                 self._status("Saxo認証失敗（ログを確認）")
-            finally:
-                self.paused = False
-                self.wake.set()
-        threading.Thread(target=login, daemon=True, name="SaxoBrowserLogin").start()
+        finally:
+            self.login_in_progress = False
+            self.paused = False
+            # Wake the polling loop now rather than wait for its next interval.
+            self.wake.set()
 
     def toggle_pause(self, icon, item):
         self.paused = not self.paused
