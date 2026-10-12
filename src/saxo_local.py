@@ -11,6 +11,7 @@ from .chart import render_pair
 from .local_monitor import clean_local_images, get_monitor_options
 from .main import is_fresh_minute_candle
 from .saxo_provider import SaxoProvider
+from .saxo_auth import SaxoLoginRequired
 
 
 def get_saxo_config(cfg):
@@ -95,6 +96,9 @@ def tick_once(config_path, now=None, provider=None):
                             source_label=f"Saxo {sax['environment'].upper()} {sax['price_side'].upper()}",
                             eight_hour_label='Saxo native 8H')
                 generated.append(path)
+            except SaxoLoginRequired:
+                # Keep the error type so the tray can prompt for browser login.
+                raise
             except Exception as exc:
                 errors.append(f'{pair}: {type(exc).__name__}: {exc}')
         if errors:

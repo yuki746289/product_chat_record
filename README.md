@@ -86,9 +86,17 @@ python -m src.saxo_auth login --config setting.yaml
 **Never paste the App Secret or OAuth tokens into a chat, setting.yaml,
 GitHub commits or screenshots.** The `configure` command asks for App Key and
 prompts for the App Secret without echoing it. `login` starts a loopback-only
-OAuth callback listener and opens Saxo in your browser once. If Windows sleeps
-or is shut down until the Refresh Token expires, click "Saxoに再ログイン" from the
-tray menu (or run the `login` command again).
+OAuth callback listener and opens Saxo in your browser once. If Windows sleeps or is shut down until the Refresh Token expires, the
+tray shows **Saxo再ログインが必要（右クリック）** and sends a **single Windows notification**
+(if Windows notifications are enabled). Right-click ChartRecorder and select
+**Saxoに再ログイン【必要】**. The Saxo browser login opens, and a successful
+authorization resumes chart capture immediately. The application does not
+repeat the expired-token API call and traceback every minute while waiting.
+If Windows suppresses the notification, the tray menu still shows the state.
+Clicking the notification itself does not launch the login screen; use the
+tray menu. The alternative command is
+`python -m src.saxo_auth login --config setting.yaml`.
+An expired refresh token cannot be recovered without browser authorization.
 
 Update the **non-secret** settings in `setting.yaml`:
 
