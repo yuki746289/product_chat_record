@@ -1,1 +1,0 @@
-One-time synthetic CI: Saxo OAuth re-login notification tests. No real Saxo market data or credentials.
