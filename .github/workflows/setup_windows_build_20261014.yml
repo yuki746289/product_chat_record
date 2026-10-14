@@ -1,0 +1,45 @@
+# Created: 2026-10-14 JST
+# Windows setup validation has no Saxo OAuth, secret, or live API dependency.
+name: Setup ChartRecorder Windows
+on:
+  workflow_dispatch:
+  # Temporary branch-only push validation; delete before merge.
+  push:
+    branches:
+      - feature/desktop-setup-installer-20261014
+permissions:
+  contents: read
+jobs:
+  windows-setup:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install build dependencies
+        shell: pwsh
+        run: python -m pip install -r requirements-windows.txt
+      - name: Run complete regression suite
+        shell: pwsh
+        run: python -m pytest -q
+      - name: Build ChartRecorder and setup.exe
+        shell: cmd
+        run: scripts\build_setup_windows.bat
+      - name: Smoke-test packaged installer without installing
+        shell: pwsh
+        run: |
+          if (!(Test-Path dist\setup.exe)) { throw "Missing dist/setup.exe" }
+          & .\dist\setup.exe --dry-run --yes
+          if ($LASTEXITCODE -ne 0) { throw "Packaged installer dry-run failed" }
+          $size = (Get-Item dist\setup.exe).Length
+          if ($size -lt 1000000) { throw "setup.exe unexpectedly small" }
+          Write-Host "Packaged setup.exe bytes: $size"
+      - name: Upload setup.exe installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: ChartRecorder-setup-windows
+          path: dist/setup.exe
+          retention-days: 7
+          if-no-files-found: error
