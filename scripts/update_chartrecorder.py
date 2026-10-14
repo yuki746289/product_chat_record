@@ -58,17 +58,24 @@ def update_install(root, location=None, force_build=False, dry_run=False,
     already_current = target.is_file() and installed_marker.is_file() and (
         installed_marker.read_text(encoding="utf-8").strip() == release_id
     )
+    installed_system = destination / "system.yaml"
+    desired_config = config
+    config_changed = not installed_system.is_file() or (
+        read_system(installed_system) != desired_config
+    )
+    requires_install = not already_current or config_changed or not (destination / "setting.yaml").is_file()
     if dry_run:
         print(f"Version: {release_id}")
         print(f"Installed: {destination}")
-        print(f"Rebuild needed: {force_build or is_dirty(root) or not already_current}")
+        print(f"Deploy needed: {force_build or is_dirty(root) or requires_install}")
+        print(f"Rebuild needed: {force_build or is_dirty(root) or not release_folder(root, release_id).joinpath('ChartRecorder.exe').is_file()}")
         return destination
     guard = guard or CooperativeShutdown()
     builder = builder or build_staged_exe
     launcher = launcher or start_installed
 
     dirty = is_dirty(root)
-    if not already_current or force_build or dirty:
+    if requires_install or force_build or dirty:
         # Dirty tracked source code must be rebuilt, not reused under a stable SHA.
         base = release_folder(root, release_id)
         stage = base if not (dirty or force_build) else release_folder(
