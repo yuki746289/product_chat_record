@@ -179,3 +179,32 @@ def test_safe_shutdown_when_not_running_is_no_op():
     ctrl = CooperativeShutdown(kernel32=kernel, get_last_error=lambda: kernel.last_error)
     assert ctrl.stop() is False
     assert not kernel.signaled
+
+
+def test_configuration_change_reinstalls_without_recompiling_binary(tmp_path, monkeypatch):
+    root, parent = prepared(tmp_path)
+    arrange(monkeypatch)
+    def builder(repo, stage):
+        (stage / "ChartRecorder.exe").write_bytes(b"MZ-CACHED")
+    installed = updater.update_install(root, location=str(parent), builder=builder,
+                                       guard=FakeGuard([]), launcher=lambda exe: None)
+    images = installed / "chart_image"
+    sample = images / "20261014_1600" / "USDJPY.png"
+    sample.parent.mkdir()
+    sample.write_bytes(b"KEEP")
+    system = root / "system.yaml"
+    system.write_text(system.read_text(encoding="utf-8").replace(
+        "image_folder: chart_image", "image_folder: chart_image_new"
+    ), encoding="utf-8")
+    events = []
+    def no_build(*args):
+        raise AssertionError("Same binary SHA must be cached")
+    installed_again = updater.update_install(root, location=str(parent), builder=no_build,
+                                             guard=FakeGuard(events), launcher=lambda exe: events.append("launch"))
+    assert installed_again == installed
+    assert (installed / "chart_image_new").is_dir()
+    assert sample.read_bytes() == b"KEEP"
+    from src.config import load_settings
+    cfg = load_settings(installed / "setting.yaml")
+    assert cfg["output"]["local_dir"] == str(installed / "chart_image_new")
+    assert events == ["stop", "launch"]
