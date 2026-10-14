@@ -1,0 +1,1 @@
+Windows synthetic CI: duplicate start prompt / cancellation / cooperative stop / legacy fallback; no Saxo APIs, no tokens.
