@@ -1,4 +1,5 @@
 # Created: 2026-10-14 JST
+# Updated: 2026-10-14 JST (multiple install destinations and override persistence)
 """Installer safety and portable output regression tests (no real Windows writes)."""
 from pathlib import Path
 from types import SimpleNamespace
@@ -116,3 +117,63 @@ def test_running_exe_cannot_be_overwritten_without_leaving_temp(tmp_path, monkey
         setup.perform_install(payload, system, desktop=desktop)
     assert (dest / "ChartRecorder.exe").read_bytes() == previous
     assert not (dest / "ChartRecorder.exe.install-tmp").exists()
+
+
+def test_c_drive_preset_uses_drive_root_and_preserves_image_settings(tmp_path):
+    payload, system = make_payload(tmp_path)
+    fake_c_root = tmp_path / "fake-c-drive"
+    fake_c_root.mkdir()
+    config = setup.read_system(system)
+    destination, folder = setup.resolve_install({**config, "location": "c_drive"}, c_drive=fake_c_root)
+    assert destination == fake_c_root / "ChartRecorder"
+    assert folder == "chart_image"
+    installed = setup.perform_install(
+        payload, system, c_drive=fake_c_root, location_override="c_drive"
+    )
+    assert installed == destination
+    assert yaml.safe_load((installed / "system.yaml").read_text(encoding="utf-8"))["install"]["location"] == "c_drive"
+    assert load_settings(installed / "setting.yaml")["output"]["local_dir"] == str(installed / "chart_image")
+
+
+def test_absolute_custom_location_choice_is_persisted(tmp_path):
+    payload, system = make_payload(tmp_path)
+    custom = (tmp_path / "custom path" / "apps").resolve()
+    custom.mkdir(parents=True)
+    dest = setup.perform_install(payload, system, location_override=str(custom))
+    assert dest == custom / "ChartRecorder"
+    system_data = yaml.safe_load((dest / "system.yaml").read_text(encoding="utf-8"))
+    assert system_data["install"]["location"] == str(custom)
+    assert (dest / "chart_image").is_dir()
+    assert (dest / "ChartRecorder.exe").is_file()
+    assert load_settings(dest / "setting.yaml")["output"]["local_dir"] == str(dest / "chart_image")
+
+
+def test_gui_override_desktop_can_replace_a_c_drive_default(tmp_path):
+    payload, system = make_payload(tmp_path)
+    system.write_text(system.read_text().replace("location: desktop", "location: c_drive"), encoding="utf-8")
+    desktop = tmp_path / "Desktop"
+    desktop.mkdir()
+    installed = setup.perform_install(payload, system, desktop=desktop, location_override="desktop")
+    assert installed == desktop / "ChartRecorder"
+    assert setup.read_system(installed / "system.yaml")["location"] == "desktop"
+
+
+def test_install_choice_rejects_invalid_or_missing_location(tmp_path):
+    payload, system = make_payload(tmp_path)
+    for invalid in ("relative/path", "", "../unsafe"):
+        with pytest.raises(ValueError, match="install.location"):
+            setup.perform_install(payload, system, location_override=invalid)
+    with pytest.raises(ValueError, match="Expected exactly one"):
+        setup.with_install_location("install:\\n  folder_name: ChartRecorder\\n", "desktop")
+
+
+def test_install_choice_preserves_no_secrets_and_folders(tmp_path):
+    payload, system = make_payload(tmp_path)
+    root = tmp_path / "C"
+    root.mkdir()
+    dest = setup.perform_install(payload, system, c_drive=root, location_override="c_drive")
+    assert list((dest / "chart_image").iterdir()) == []
+    for name in ("setting.yaml", "system.yaml"):
+        contents = (dest / name).read_text(encoding="utf-8").lower()
+        for forbidden in ("access_token:", "refresh_token:", "app_secret:"):
+            assert forbidden not in contents
