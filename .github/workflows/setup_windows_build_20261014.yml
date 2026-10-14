@@ -3,10 +3,6 @@
 name: Setup ChartRecorder Windows
 on:
   workflow_dispatch:
-  # Temporary branch-only push validation; delete before merge.
-  push:
-    branches:
-      - feature/desktop-setup-installer-20261014
 permissions:
   contents: read
 jobs:
