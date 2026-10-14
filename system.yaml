@@ -1,7 +1,8 @@
 # Created: 2026-10-14 JST
 # ChartRecorder installer destinations. No credentials or Saxo tokens belong here.
-# Run setup.exe again after changing this file to apply a new installation path.
+# Updated: 2026-10-14 JST (select from desktop/c_drive/custom in setup UI or CLI).
+# Run setup.exe again after changing the install location.
 install:
-  location     : desktop       # desktop = current user's real Desktop (including OneDrive redirection); or absolute parent directory
+  location     : desktop       # desktop=Windows Desktop, c_drive=C:/, or absolute parent path (example: D:/Apps)
   folder_name  : ChartRecorder # folder created under location
   image_folder : chart_image   # child folder for captures and local logs
