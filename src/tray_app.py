@@ -195,7 +195,7 @@ class TrayController:
                              enabled=lambda _: os.name == "nt" and getattr(sys, "frozen", False)),
             pystray.MenuItem("終了", self.stop),
         )
-        if self.instance_guard is not None:
+        if getattr(self, "instance_guard", None) is not None:
             self.instance_watcher = threading.Thread(
                 target=self.instance_guard.watch_for_stop,
                 args=(self._request_restart_stop, self.stopping),
@@ -211,9 +211,9 @@ class TrayController:
             self.wake.set()
             if self.worker is not None:
                 self.worker.join(timeout=5)
-            if self.instance_watcher is not None:
+            if getattr(self, "instance_watcher", None) is not None:
                 self.instance_watcher.join(timeout=1)
-            if self.instance_guard is not None:
+            if getattr(self, "instance_guard", None) is not None:
                 self.instance_guard.close()
 
     def _request_restart_stop(self):
