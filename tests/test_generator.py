@@ -20,7 +20,7 @@ def test_config():
     assert len(EXPECTED_TIMEFRAMES) == 9
     assert cfg['chart']['ema'] == [20,30,40]
     assert cfg['chart']['rci'] == [9,14,26]
-    assert cfg['output']['retention_hours'] == 8
+    assert cfg['local_monitor']['max_folders'] == 10
 
 def test_rci_and_ema():
     df = DemoProvider().get('FX:USDJPY', '1H', 120)
