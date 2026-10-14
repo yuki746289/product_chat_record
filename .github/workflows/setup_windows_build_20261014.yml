@@ -3,10 +3,6 @@
 name: Setup ChartRecorder Windows
 on:
   workflow_dispatch:
-  # One-time Windows validation for this development branch only.
-  push:
-    branches:
-      - feature/versioned-safe-rebuild-restart-20261014
 permissions:
   contents: read
 jobs:
