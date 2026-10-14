@@ -3,11 +3,6 @@
 name: Validate ChartRecorder Windows Tray
 on:
   workflow_dispatch:
-  # Temporary test-only trigger; remove immediately after verified run.
-  push:
-    branches: ['feature/tray-startup-restart-dialog-20261014']
-    paths:
-      - '.github/test-request/20261014-restart-dialog.txt'
 permissions:
   contents: read
 jobs:
