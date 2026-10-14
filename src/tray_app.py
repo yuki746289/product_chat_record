@@ -1,6 +1,7 @@
 # Created: 2026-10-10 10:39 JST
 # Updated: 2026-10-10 JST (argument-free EXE config discovery)
 # Updated: 2026-10-12 JST (Saxo re-login notification and recovery)
+# Updated: 2026-10-14 JST (make tray icon visible in custom pystray setup)
 """Windows system-tray watcher for Chart Recorder (no global background daemon)."""
 import argparse
 import ctypes
@@ -192,14 +193,10 @@ class TrayController:
                              enabled=lambda _: os.name == "nt" and getattr(sys, "frozen", False)),
             pystray.MenuItem("終了", self.stop),
         )
-        def start_polling(icon):
-            # pystray calls setup after the icon becomes ready for notifications.
-            if not self.stopping.is_set():
-                self.worker = threading.Thread(target=self.poll_loop, name="ChartLocalPolling", daemon=True)
-                self.worker.start()
-
         try:
-            self.icon.run(setup=start_polling)
+            # A custom pystray setup callback MUST explicitly show the icon.
+            # Without this, polling runs but Windows has no tray entry to access.
+            self.icon.run(setup=self._on_tray_ready)
         finally:
             self.stopping.set()
             self.wake.set()
@@ -207,6 +204,27 @@ class TrayController:
                 self.worker.join(timeout=5)
             if self.single_instance_handle is not None:
                 self.kernel32.CloseHandle(self.single_instance_handle)
+
+    def _on_tray_ready(self, icon):
+        """Show the Windows notification-area icon BEFORE starting polling.
+
+        pystray's default setup sets visible=True, but supplying our own
+        setup callback replaces that default. Never leave a hidden daemon if
+        Windows rejects icon registration.
+        """
+        try:
+            icon.visible = True
+        except Exception:
+            self.logger.exception("Tray icon could not be displayed; stopping ChartRecorder")
+            self.stopping.set()
+            icon.stop()
+            return
+        self.logger.info("Tray icon initialized and visible; mode=%s", self.mode)
+        if not self.stopping.is_set():
+            self.worker = threading.Thread(
+                target=self.poll_loop, name="ChartLocalPolling", daemon=True
+            )
+            self.worker.start()
 
     def start_saxo_login(self, icon, item):
         if self.mode != "saxo_local" or self.login_in_progress:
