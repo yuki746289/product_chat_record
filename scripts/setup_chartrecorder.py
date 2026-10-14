@@ -88,7 +88,7 @@ def resolve_install(config, desktop=None, c_drive=None):
 
 def with_install_location(system_text, location):
     """Persist a GUI/CLI installation choice while preserving the YAML fields."""
-    rx = re.compile(r"^([ \\t]*location[ \\t]*:[ \\t]*)[^\\r\\n#]*(?:[ \\t]*#.*)?$", re.MULTILINE)
+    rx = re.compile(r"^([ \t]*location[ \t]*:[ \t]*)[^\r\n#]*(?:[ \t]*#.*)?$", re.MULTILINE)
     if len(rx.findall(system_text)) != 1:
         raise ValueError("Expected exactly one install.location in system.yaml")
     updated = rx.sub(
