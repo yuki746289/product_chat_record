@@ -117,3 +117,37 @@ def test_environment_vaults_are_isolated():
     )
     with __import__("pytest").raises(SaxoLoginRequired):
         credentials("live", vault)
+
+
+def test_new_packaged_pc_triggers_first_run_from_tray(monkeypatch):
+    app = make_login_controller()
+    app.login_in_progress = False
+    app.stopping = threading.Event()
+    calls = []
+    app.start_saxo_login = lambda icon, item: calls.append("first-run-dialog")
+    monkeypatch.setattr(tray_app, "load_settings", lambda _: {"saxo": {"environment": "sim"}})
+    monkeypatch.setattr(tray_app, "credentials", Mock(side_effect=SaxoLoginRequired("missing")))
+    app._prompt_initial_saxo_setup()
+    assert calls == ["first-run-dialog"]
+
+
+def test_existing_saxo_app_credentials_do_not_trigger_initial_dialog(monkeypatch):
+    app = make_login_controller()
+    app.login_in_progress = False
+    app.stopping = threading.Event()
+    app.start_saxo_login = Mock()
+    monkeypatch.setattr(tray_app, "load_settings", lambda _: {"saxo": {"environment": "sim"}})
+    monkeypatch.setattr(tray_app, "credentials", Mock(return_value=("EXISTING_KEY", "EXISTING_SECRET")))
+    app._prompt_initial_saxo_setup()
+    app.start_saxo_login.assert_not_called()
+
+
+def test_first_run_does_not_popup_during_shutdown(monkeypatch):
+    app = make_login_controller()
+    app.login_in_progress = False
+    app.stopping = threading.Event()
+    app.stopping.set()
+    app.start_saxo_login = Mock()
+    monkeypatch.setattr(tray_app, "load_settings", Mock(side_effect=AssertionError("should not load")))
+    app._prompt_initial_saxo_setup()
+    app.start_saxo_login.assert_not_called()
