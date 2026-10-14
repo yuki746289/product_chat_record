@@ -48,7 +48,7 @@ in Windows Credential Manager.
 
 ## Desktop installer (2026-10-14)
 
-Build `setup.exe` with `scripts\\build_setup_windows.bat` (or obtain the validated Windows Actions setup artifact). It installs `ChartRecorder.exe`, `setting.yaml`, `system.yaml` and `chart_image/` under **Desktop/ChartRecorder** by default. The destination is configured in `system.yaml`, not hardcoded to the Git repository path. New images are written to `chart_image`; previously saved `C:/TradingViewCharts` images are not removed or silently relocated. The installer never bundles Saxo credentials and does not force-kill the running app.
+Build `setup.exe` with `scripts\\build_setup_windows.bat` (or obtain the validated Windows Actions setup artifact). The setup dialog lets you choose **desktop** (default), **c_drive** (`C:/ChartRecorder`), or a custom absolute parent folder. The same options are available using `setup.exe --location ... --yes`. It installs `ChartRecorder.exe`, `setting.yaml`, `system.yaml` and `chart_image/` under that selected location. The destination is configured in `system.yaml`, not hardcoded to the Git repository path. New images are written to `chart_image`; previously saved `C:/TradingViewCharts` images are not removed or silently relocated. The installer never bundles Saxo credentials and does not force-kill the running app.
 
 Details and update procedure: [Windows Desktop setup guide](docs/WINDOWS_DESKTOP_SETUP_20261014.md).
 
