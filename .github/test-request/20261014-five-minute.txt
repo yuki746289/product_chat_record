@@ -1,0 +1,1 @@
+One-time synthetic-only regression: 5 minute slots, latest 10 folders, YAML aligned comments. No Saxo credentials/data.
