@@ -3,7 +3,7 @@
 
 ## Layout
 
-Default `system.yaml` chooses the current Windows user's actual Desktop, including OneDrive redirected Desktop.
+Default `system.yaml` chooses the current Windows user's actual Desktop, including OneDrive redirected Desktop. The installer has a GUI location dropdown with **desktop**, **c_drive**, and **custom directory** choices.
 
 ```text
 Desktop/
@@ -19,6 +19,30 @@ Desktop/
 
 The installer EXE is `dist/setup.exe`. It embeds the latest `dist/ChartRecorder.exe`, public `setting.yaml` template and `system.yaml`; Saxo secrets and tokens are **never** bundled. Existing Saxo keyring credentials stay available to the same Windows user.
 
+## Selecting an installation directory
+
+`setup.exe` (double-click, or launch without `--yes`) prompts you to select:
+
+| GUI choice | `system.yaml install.location` | Output directory |
+| --- | --- | --- |
+| Desktop | `desktop` (default) | Windows Desktop/ChartRecorder |
+| C drive root | `c_drive` | `C:/ChartRecorder` |
+| Custom path / browse | Absolute parent path such as `D:/Applications` | `D:/Applications/ChartRecorder` |
+
+The selected directory and the `chart_image` child are shown before installation. It never moves existing image folders. The installer records the selected choice in the **installed** `system.yaml`; `setup.exe` on its own next run still uses its bundled settings, or a user-provided `system.yaml` beside the installer.
+
+You can bypass the GUI via the Windows shell (`--yes` is for non-interactive installation):
+
+```bash
+./dist/setup.exe --dry-run --yes --location desktop
+./dist/setup.exe --dry-run --yes --location c_drive
+./dist/setup.exe --location desktop --yes
+./dist/setup.exe --location c_drive --yes
+./dist/setup.exe --location "D:/Applications" --yes
+```
+
+`c_drive` is `C:/ChartRecorder`, not `C:/Users/<user>/ChartRecorder`. Windows may restrict creating directories directly under `C:/`: if access is denied, use Desktop or a writable custom directory. No implicit privilege elevation occurs.
+
 ## Building on Windows
 
 From the repository root in Git Bash:
@@ -28,11 +52,11 @@ cmd.exe /c 'scripts\build_setup_windows.bat'
 powershell.exe -NoProfile -Command 'Start-Process -FilePath ".\dist\setup.exe"'
 ```
 
-`setup.exe` asks for confirmation, installs to Desktop/ChartRecorder and optionally launches the installed EXE. The installer **does not** force-terminate the older application. Exit any running ChartRecorder from the tray first, especially if upgrading the copy at the same destination; a locked destination EXE causes an understandable error and remains unchanged.
+`setup.exe` lets you choose Desktop, C drive or a custom location, then asks for confirmation and optionally launches the installed EXE. The installer **does not** force-terminate the older application. Exit any running ChartRecorder from the tray first, especially if upgrading the copy at the same destination; a locked destination EXE causes an understandable error and remains unchanged.
 
 Do **not** run `dist/ChartRecorder.exe` after installation: launch the installed desktop `ChartRecorder/ChartRecorder.exe`. Both executables share the Windows single-instance mutex, so simultaneous Saxo OAuth refresh and downloads remain prevented.
 
-A `system.yaml` placed **beside setup.exe** overrides the embedded `system.yaml`. `install.location: desktop` uses the user's Desktop; an absolute parent directory can be configured instead. `folder_name` and `image_folder` must be plain folder names. Example:
+A `system.yaml` placed **beside setup.exe** overrides the embedded `system.yaml`. `install.location: desktop` uses the user's Desktop, `c_drive` uses `C:/`; an absolute parent directory can also be configured. `folder_name` and `image_folder` must be plain folder names. Example:
 
 ```yaml
 install:
