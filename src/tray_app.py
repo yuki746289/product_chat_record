@@ -2,9 +2,9 @@
 # Updated: 2026-10-10 JST (argument-free EXE config discovery)
 # Updated: 2026-10-12 JST (Saxo re-login notification and recovery)
 # Updated: 2026-10-14 JST (make tray icon visible in custom pystray setup)
+# Updated: 2026-10-14 JST (friendly single-instance dialog and cooperative restart)
 """Windows system-tray watcher for Chart Recorder (no global background daemon)."""
 import argparse
-import ctypes
 import logging
 from logging.handlers import RotatingFileHandler
 import os
@@ -18,6 +18,7 @@ from .config import load_settings
 from .local_monitor import get_monitor_options, poll_once
 from .saxo_local import tick_once
 from .saxo_auth import SaxoSession, SaxoLoginRequired
+from .windows_single_instance import WindowsSingleInstance
 
 APP_NAME = "ChartRecorder"
 REGISTRY_KEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
@@ -98,6 +99,8 @@ class TrayController:
         self.icon = None
         self.single_instance_handle = None
         self.kernel32 = None
+        self.instance_guard = None
+        self.instance_watcher = None
         self.worker = None
         self.local_dir.mkdir(parents=True, exist_ok=True)
         self.logger = logging.getLogger("chart_recorder")
@@ -165,15 +168,14 @@ class TrayController:
 
     def run(self):
         if os.name == "nt":
-            # A second process could race to rotate the same refresh token.
-            self.kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
-            self.kernel32.CreateMutexW.argtypes = [ctypes.c_void_p, ctypes.c_bool, ctypes.c_wchar_p]
-            self.kernel32.CreateMutexW.restype = ctypes.c_void_p
-            self.kernel32.CloseHandle.argtypes = [ctypes.c_void_p]
-            mutex = self.kernel32.CreateMutexW(None, False, "Local\\ChartRecorderSaxoTray")
-            if not mutex or ctypes.get_last_error() == 183:
-                raise RuntimeError("ChartRecorder is already running for this Windows session")
-            self.single_instance_handle = mutex
+            # Single-instance protection is mandatory: simultaneous Saxo
+            # OAuth refresh-token rotation can invalidate both processes.
+            guard = WindowsSingleInstance()
+            if not guard.acquire():
+                # User cancelled, or the old version cannot stop cooperatively.
+                # No fatal PyInstaller traceback/dialog should be shown.
+                return
+            self.instance_guard = guard
         if self.mode == "github" and not shutil.which("gh"):
             raise RuntimeError("GitHub CLI (gh) is missing. Install it and run gh auth login.")
         import pystray
@@ -193,6 +195,13 @@ class TrayController:
                              enabled=lambda _: os.name == "nt" and getattr(sys, "frozen", False)),
             pystray.MenuItem("終了", self.stop),
         )
+        if self.instance_guard is not None:
+            self.instance_watcher = threading.Thread(
+                target=self.instance_guard.watch_for_stop,
+                args=(self._request_restart_stop, self.stopping),
+                name="ChartRestartListener", daemon=True,
+            )
+            self.instance_watcher.start()
         try:
             # A custom pystray setup callback MUST explicitly show the icon.
             # Without this, polling runs but Windows has no tray entry to access.
@@ -202,8 +211,18 @@ class TrayController:
             self.wake.set()
             if self.worker is not None:
                 self.worker.join(timeout=5)
-            if self.single_instance_handle is not None:
-                self.kernel32.CloseHandle(self.single_instance_handle)
+            if self.instance_watcher is not None:
+                self.instance_watcher.join(timeout=1)
+            if self.instance_guard is not None:
+                self.instance_guard.close()
+
+    def _request_restart_stop(self):
+        """Cooperatively exit after a new launcher requests replacement."""
+        self.logger.info("Restart requested by a new ChartRecorder launcher")
+        self.stopping.set()
+        self.wake.set()
+        if self.icon is not None:
+            self.icon.stop()
 
     def _on_tray_ready(self, icon):
         """Show the Windows notification-area icon BEFORE starting polling.
