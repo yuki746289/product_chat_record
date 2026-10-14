@@ -17,7 +17,39 @@ Desktop/
         cross_jpy/*.png
 ```
 
-The installer EXE is `dist/setup.exe`. It embeds the latest `dist/ChartRecorder.exe`, public `setting.yaml` template and `system.yaml`; Saxo secrets and tokens are **never** bundled. Existing Saxo keyring credentials stay available to the same Windows user.
+The installer EXE is `dist/setup.exe`. It embeds the latest versioned `ChartRecorder.exe`, public `setting.yaml` template and `system.yaml`; Saxo secrets and tokens are **never** bundled. Existing Saxo keyring credentials stay available to the same Windows user.
+
+## Installing on another Windows PC with only setup.exe
+
+The destination PC needs **only setup.exe**, a network connection and access to
+the relevant Saxo OpenAPI app. It does not need a Python installation, Git,
+GitHub CLI, or the source repository.
+
+1. Copy the Windows-built `dist/setup.exe` to the other PC (for example using USB).
+2. Double-click it, select `desktop`, `c_drive` or a writable custom folder,
+   and confirm installation. Choose to launch ChartRecorder when prompted.
+3. On a **fresh** Windows user account, the packaged ChartRecorder opens a
+   `Saxo初期設定` dialog automatically because no Saxo OpenAPI App Key/Secret
+   is stored. Enter the **App Key and App Secret**, not the Saxo account password.
+4. Choose `保存してブラウザでログイン`. The credentials are saved to the
+   current user's **Windows Credential Manager** only. The existing Saxo
+   Authorization Code login opens in the **default web browser**, allowing
+   the user's browser/password-manager autofill for their Saxo account.
+5. Once browser authorization returns through the configured loopback redirect,
+   the existing five-minute chart capture starts automatically. Chart output is
+   saved to the installed `chart_image`.
+
+If the initial dialog is canceled, ChartRecorder remains running without
+capturing images; choose `Saxoに再ログイン` from the tray menu to retry.
+For subsequent token expiry, the existing browser re-login continues without
+requesting the App Key/Secret again, unless those credentials have been removed.
+
+**Security:** setup.exe does not contain App Key, App Secret, Saxo account
+password or OAuth tokens. The App Secret input is masked, and credentials are
+never copied to YAML, GitHub, chart images or log files. Use the same Saxo SIM
+or LIVE environment and a registered redirect URI matching `setting.yaml`.
+A different Windows PC will not inherit the old PC's vault; re-enter the app
+credentials and sign in once per Windows user.
 
 ## Selecting an installation directory
 
