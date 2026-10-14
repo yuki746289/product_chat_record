@@ -20,6 +20,10 @@ jobs:
       - name: Run complete regression suite
         shell: pwsh
         run: python -m pytest -q
+      - name: Validate packaged first-run GUI dependencies
+        shell: pwsh
+        run: |
+          python -c "import tkinter; from src.saxo_first_run import ensure_app_credentials; print('Tkinter and offline credential setup import PASS')"
       - name: Build ChartRecorder and setup.exe
         shell: cmd
         run: scripts\build_setup_windows.bat

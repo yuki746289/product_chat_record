@@ -54,6 +54,21 @@ For a one-command versioned update that preserves active Saxo captures, use `cmd
 
 Details and update procedure: [Windows Desktop setup guide](docs/WINDOWS_DESKTOP_SETUP_20261014.md).
 
+### New Windows PC: setup.exe only (2026-10-14)
+
+On a new Windows PC, **copy only `setup.exe`**, install, and launch
+ChartRecorder. If no Saxo OpenAPI App Key/Secret is configured in this Windows
+user's Credential Manager, a masked `Saxo初期設定` dialog opens automatically.
+Enter the Saxo **App Key** and **App Secret** once. ChartRecorder then opens
+the usual Saxo account login in the **default browser** (password autofill is
+handled by the browser/password manager). No Saxo account password or OAuth
+token is bundled into the installer or written to YAML or GitHub.
+
+Python and Git are **not needed on the destination PC**. Existing local
+installations with stored App Key/Secret continue to use the usual manual
+browser re-login when their Saxo OAuth session expires. See
+[standalone setup instructions](docs/WINDOWS_DESKTOP_SETUP_20261014.md).
+
 ## Recommended: Saxo local Windows mode (SIM-first)
 
 **No GitHub Actions or GitHub CLI is needed for chart generation in this mode.**
@@ -81,7 +96,7 @@ git pull --ff-only origin main
 Check `git status` before switching or pulling; resolve local modifications
 first rather than discarding them.
 
-### Initial one-time authentication (Windows Command Prompt)
+### Optional developer-only initial authentication (Windows Command Prompt)
 
 From your local `product_chat_record` directory:
 
