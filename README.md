@@ -37,8 +37,8 @@ C:/TradingViewCharts/
       EURJPY.png  CADJPY.png  NZDJPY.png
 ```
 
-Retention is evaluated at the timestamp-folder level: preserve **every folder
-within 8 hours or the newest 16 timestamp folders**, then delete older batches.
+Retention is evaluated at the timestamp-folder level: retain **only the newest
+10 timestamp folders** with PNGs, deleting older batches.
 Existing top-level timestamp folders with PNGs are also recognized. The legacy
 GitHub Artifact downloader accepts both category-layout and flat images.
 
@@ -50,8 +50,8 @@ in Windows Credential Manager.
 
 **No GitHub Actions or GitHub CLI is needed for chart generation in this mode.**
 The Windows tray app connects to the Saxo OpenAPI, refreshes OAuth tokens while
-running, checks data each 30-minute slot, renders one 9-panel PNG per configured
-FX pair, and retains all folders from the last **8 hours OR the latest 16**.
+running, checks each **5-minute slot**, renders one 9-panel PNG per configured
+FX pair, and keeps **no more than the latest 10 timestamp folders**.
 Tokens and App Secret are kept in the Windows user's Credential Manager, not in Git.
 
 The app uses the Saxo **Authorization Code** grant selected when the SIM app
@@ -109,9 +109,8 @@ saxo:
 local_monitor:
   mode: saxo_local
   poll_seconds: 60
-  chart_interval_minutes: 30
-  retention_hours: 8
-  min_folders: 16
+  chart_interval_minutes : 5   # 画像取得間隔（分）
+  max_folders            : 10  # 保持する最新の日時フォルダ数
 ```
 
 While FX is open, run the first Saxo test locally:
@@ -135,7 +134,12 @@ Or launch it in Git Bash with **no arguments**:
 
 The EXE at `dist/ChartRecorder.exe` automatically uses the Git-managed
 `setting.yaml` **one directory above `dist`**. This works even if started
-from another working directory or double-clicked in Explorer. An outdated
+from another working directory or double-clicked in Explorer.
+The EXE includes Python dependencies, but still requires the external
+`setting.yaml`, Saxo credentials stored in Windows Credential Manager, and
+network access. An EXE copied alone to another PC is not sufficient.
+On the first run after reducing the folder limit, older snapshots beyond
+10 will be deleted; back up any history you want to keep. An outdated
 `dist/setting.yaml` file is ignored. The build no longer copies a second
 settings file into `dist`. Use `--config PATH` only if deliberately running
 with a nonstandard settings path.
@@ -231,28 +235,24 @@ Settings in `setting.yaml`:
 
 ```yaml
 local_monitor:
-  poll_seconds: 60
-  retention_hours: 8
-  min_folders: 16
+  poll_seconds : 60  # ポーリング間隔（秒）
+  max_folders  : 10  # 最大保存フォルダ数
 ```
 
-After every poll, preserve **all timestamp folders not older than eight
-hours**, and **at least the newest 16 nonempty timestamp folders**, even
-across weekends/market holidays. Delete only folders matching
-`YYYYMMDD_HHmm` that contain PNGs and violate both retention criteria.
+After every poll, preserve **only the newest 10 timestamp folders** with PNGs,
+even across weekends/market holidays. Delete older folders matching
+`YYYYMMDD_HHmm` that contain PNGs and exceed the folder-count limit.
 Unknown folder names are never deleted. Images remain at
-`<output.local_dir>\yyyyMMdd_HHmm\<currency_pair>.png`.
+`<output.local_dir>\yyyyMMdd_HHmm\<category>\<currency_pair>.png`.
 A folder can have fewer pairs when TradingView returns fresh data for only
 some symbols. A `.downloaded_artifacts.json` file prevents repeat downloads.
 
-The app backfills all **available unprocessed** GitHub artifacts in oldest-
-first order (up to the latest 16 plus any within the eight-hour window). Images
-already expired or deleted from GitHub cannot be recovered. An interruption
+The app backfills only the **latest 10 available unprocessed** GitHub artifacts,
+in oldest-first order. Images already expired or deleted from GitHub cannot be recovered. An interruption
 keeps the last successful images and retries missing downloads. No images are
 created locally during a market closure when no new GitHub artifacts exist.
-The 8-hour retention applies to local files; GitHub currently keeps its
-Artifacts for one day unless cleanup is run (the automated cleanup cron is
-currently disabled).
+The local limit of 10 timestamp folders does not change GitHub Artifact retention.
+Artifacts have their own policy (the automated cleanup cron remains disabled).
 
 ### Manual legacy download (Python only)
 
@@ -268,8 +268,7 @@ The default `saxo_local` mode does not need this command or GitHub CLI.
 
 ## Updating setting.yaml on main
 
-The working branch for normal operation is **main**. After PR #1 is merged,
-use `main` for downloads and your local configuration updates.
+The working branch for normal operation is **main**; use this for local configuration updates.
 
 One-time clone (Windows Command Prompt or PowerShell):
 

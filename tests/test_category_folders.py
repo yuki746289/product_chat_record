@@ -72,7 +72,7 @@ def test_category_output_and_slot_dedupe(tmp_path, monkeypatch):
     assert saxo_local.tick_once(f, now=now + timedelta(minutes=1), provider=_demo_source(now)) == []
 
 
-def test_nested_retention_preserves_sixteen(tmp_path):
+def test_nested_retention_preserves_ten(tmp_path):
     now = datetime(2026, 10, 10, 10, tzinfo=timezone.utc)
     snapshots = []
     for i in range(20):
@@ -81,10 +81,10 @@ def test_nested_retention_preserves_sixteen(tmp_path):
         nested.mkdir(parents=True)
         (nested / "USDJPY.png").write_bytes(b"PNG")
         snapshots.append(folder)
-    deleted = clean_local_images(tmp_path, now, 8, 16, "UTC")
-    assert len(deleted) == 4
-    assert all(not p.exists() for p in snapshots[:4])
-    assert all(p.exists() for p in snapshots[4:])
+    deleted = clean_local_images(tmp_path, now, 10, "UTC")
+    assert len(deleted) == 10
+    assert all(not p.exists() for p in snapshots[:10])
+    assert all(p.exists() for p in snapshots[10:])
 
 
 def test_unrelated_folders_are_preserved(tmp_path):
@@ -92,7 +92,7 @@ def test_unrelated_folders_are_preserved(tmp_path):
     folder = tmp_path / "20200101_0000"
     (folder / "notes").mkdir(parents=True)
     (folder / "notes" / "keep.txt").write_text("important")
-    assert clean_local_images(tmp_path, now, 8, 16, "UTC") == []
+    assert clean_local_images(tmp_path, now, 10, "UTC") == []
     assert folder.exists()
 
 

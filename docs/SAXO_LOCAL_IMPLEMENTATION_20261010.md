@@ -6,9 +6,9 @@
 - GitHub repository is **code and public configuration only**; Saxo quotes and all OAuth tokens remain on the Windows PC.
 - `src/saxo_auth.py`: registered **Authorization Code** flow, local callback (`http://localhost:8765/callback` by default), OAuth state verification, access-token renewal and refresh-token rotation; Windows Credential Manager via `keyring` stores App Key, App Secret, access/refresh tokens.
 - `src/saxo_provider.py`: Saxo REST API instrument search (`ref/v1/instruments`) for exactly matching `FxSpot` pair; chart data via `chart/v3/charts` with **Bid** as default. No order/trade endpoints.
-- `src/saxo_local.py`: tray calls it every 60 seconds. Tokens are refreshed as required even between chart generations. One image batch per 30-minute UTC-aligned slot; no image if 1-minute candle is stale. 9 direct Saxo horizons: 1/5/15/60/240/480/1440/10080/43200 minutes.
+- `src/saxo_local.py`: tray calls it every 60 seconds. Tokens are refreshed as required even between chart generations. One image batch per 5-minute UTC-aligned slot; no image if 1-minute candle is stale. 9 direct Saxo horizons: 1/5/15/60/240/480/1440/10080/43200 minutes.
 - `src/chart.py`: original 2-column 9-chart layout, EMA20/30/40, RCI9/14/26, 12-bar right padding, with Saxo data source text.
-- `src/local_monitor.py`: existing image retention logic reused — retain **all folders <=8 hours old OR newest 16**.
+- `src/local_monitor.py`: existing image retention logic reused — retain **at most the newest 10 timestamp folders**.
 - `src/tray_app.py`: existing `github` download mode retained; new `saxo_local` mode, one-minute tick, optional browser re-login from tray, Windows autostart and single-instance mutex.
 
 ## Configuration and controls
@@ -24,9 +24,8 @@ saxo:
 local_monitor:
   mode: saxo_local
   poll_seconds: 60
-  chart_interval_minutes: 30
-  retention_hours: 8
-  min_folders: 16
+  chart_interval_minutes : 5   # 画像生成間隔（分）
+  max_folders            : 10  # 最大保存日時フォルダ数
 ```
 
 **Never** save App Key/App Secret, OAuth codes, access/refresh tokens or market-data dumps inside the Public GitHub repository. The app refuses Saxo API calls until `saxo.enabled: true`.
@@ -38,12 +37,12 @@ local_monitor:
 3. Run `python -m src.saxo_auth configure --config setting.yaml` to save App Key and App Secret to Windows Credential Manager (hidden secret prompt).
 4. Run `python -m src.saxo_auth login --config setting.yaml` for browser authorization; the app validates OAuth state and stores rotating tokens in the credential vault.
 5. Set `saxo.enabled: true` and run `python -m src.saxo_local --config setting.yaml` while FX market is open. SIM data/feed accuracy and delay require live checks.
-6. Build EXE using `scripts\build_windows.bat` and launch from repository root using `dist\ChartRecorder.exe --config "%CD%\setting.yaml"`.
+6. Build EXE using `scripts\build_windows.bat` and launch from repository root using `dist\ChartRecorder.exe` without arguments; the repository-root `setting.yaml` and Windows Credential Manager credentials are still required.
 7. If PC is off/asleep longer than the refresh-token expiry, manually sign in again. An invalid/revoked previously pasted 24-hour token is *not* reused.
 
 ## Testing and gaps
 
-- Mock Saxo payloads, OHLC Bid/Ask handling, FxSpot UIC lookup, token rotation and expiry, 30-minute scheduling, weekend no-data skip, PNG rendering: tested on Linux without account secrets.
+- Mock Saxo payloads, OHLC Bid/Ask handling, FxSpot UIC lookup, token rotation and expiry, 5-minute scheduling, weekend no-data skip, PNG rendering: tested on Linux without account secrets.
 - Not yet tested: Saxo SIM **real** OAuth browser callback, live SIM instruments/UIC, actual Saxo quote field sets, 8H/month bar boundary versus SaxoTrader, Windows Credential Manager, real Windows tray/EXE build.
 - Do not enable LIVE mode before validating broker data rights and explicit account access. SIM environment is the only default.
 - The registered Code-grant client secret remains on the same Windows user credential vault. For true native apps Saxo recommends PKCE. This project deliberately matches the user's existing Code-grant app for local-only use; if a native PKCE app is registered later, migrate the OAuth flow instead of reusing this confidential-client mechanism.
@@ -54,3 +53,12 @@ local_monitor:
 - https://www.developer.saxo/openapi/learn/security
 - https://www.developer.saxo/openapi/referencedocs/chart/v3/charts/get__chart
 - https://www.developer.saxo/openapi/referencedocs/ref/v1/instruments/get__ref
+
+## 2026-10-14 — 5分間隔・最大10フォルダ
+
+- `local_monitor.chart_interval_minutes: 5`: 5分ごとの最新チャート取得。13通貨ペアの9時間足は維持。
+- `local_monitor.max_folders: 10`: 保存済み日時フォルダのうち有効なPNGがある最新10個だけ残す。11個目以降を削除。時間によるローカル保持設定は廃止。
+- 旧 `local_monitor.retention_hours` / `min_folders` は明示的エラー。旧設定の誤運用を防止。
+- 古い `output.retention_hours` はローカル保存数と無関係なので設定ファイルから削除。GitHub Artifactの保存期間は変更しない。
+- EXEはPython同梱でも外部 `setting.yaml` とWindowsのSaxo認証資格情報、ネット接続が必要。
+- 市場閉鎖時は新たな画像を作らず最新10フォルダを保持。Saxo APIの実取得時間・負荷は実機で確認が必要。

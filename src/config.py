@@ -47,6 +47,4 @@ def load_settings(path):
         raise ValueError('market.max_1m_age_minutes must be an integer from 1 to 30')
     if cfg.get('provider', {}).get('type') != 'tradingview_mcp':
         raise ValueError('provider.type must be tradingview_mcp; demo uses --demo')
-    if cfg.get('output', {}).get('retention_hours') != 8:
-        raise ValueError('retention_hours must be 8')
     return cfg

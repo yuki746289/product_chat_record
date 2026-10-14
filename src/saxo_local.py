@@ -1,5 +1,5 @@
 # Created: 2026-10-10 JST
-"""Local Saxo chart captures: 30-minute snapshots, token refresh, conservative retention."""
+"""Local Saxo chart captures: 5-minute snapshots and count-limited retention."""
 import argparse
 from datetime import datetime, timezone
 import json
@@ -20,9 +20,9 @@ def get_saxo_config(cfg):
         raise ValueError('saxo.environment must be sim or live')
     if sax.get('price_side') not in ('bid','ask'):
         raise ValueError('saxo.price_side must be bid or ask')
-    period=cfg.get('local_monitor',{}).get('chart_interval_minutes',30)
-    if isinstance(period,bool) or period not in (15,30,60):
-        raise ValueError('chart_interval_minutes must be 15, 30, or 60')
+    period=cfg.get('local_monitor',{}).get('chart_interval_minutes',5)
+    if isinstance(period,bool) or not isinstance(period,int) or period not in (5,15,30,60):
+        raise ValueError('chart_interval_minutes must be 5, 15, 30, or 60')
     return sax,period
 
 
@@ -49,7 +49,7 @@ def _save_last_success(root,slot):
 
 
 def tick_once(config_path, now=None, provider=None):
-    """Called every minute by tray; refresh token every tick and generate at most once/slot.
+    """Called on each tray poll; refresh token and generate at most once/slot.
 
     Only the listed configured pairs are written, and stale pairs are skipped.
     If data is unavailable, the slot stays eligible for retry on the next poll.
@@ -64,10 +64,10 @@ def tick_once(config_path, now=None, provider=None):
     now=now.astimezone(timezone.utc)
     root=Path(cfg['output']['local_dir'])
     root.mkdir(parents=True,exist_ok=True)
-    _,hours,minimum=get_monitor_options(cfg)
+    _,maximum=get_monitor_options(cfg)
     source=provider or SaxoProvider(cfg)
     try:
-        # Refresh access/refresh tokens even if no 30-minute snapshot is due.
+        # Refresh tokens even if no new 5-minute snapshot is due.
         source.session.access_token()
         slot=str(int(now.timestamp())//(period*60))
         if _read_last_success(root)==slot:
@@ -109,7 +109,7 @@ def tick_once(config_path, now=None, provider=None):
             _save_last_success(root,slot)
         return generated
     finally:
-        clean_local_images(root,now,hours,minimum,cfg['output']['timezone'])
+        clean_local_images(root,now,maximum,cfg['output']['timezone'])
 
 
 def main():

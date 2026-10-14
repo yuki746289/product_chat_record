@@ -119,7 +119,7 @@ def _stub_source(now,has_new=True):
     return Source()
 
 
-def test_local_halfhour_generation_and_dedupe(tmp_path,monkeypatch):
+def test_local_five_minute_generation_and_dedupe(tmp_path,monkeypatch):
     import yaml
     from src import saxo_local
     setting=cfg();setting['saxo']['enabled']=True
@@ -141,7 +141,9 @@ def test_local_halfhour_generation_and_dedupe(tmp_path,monkeypatch):
     assert calls[0][2]['source_label']=='Saxo SIM BID'
     assert tick_once(cp,now+timedelta(minutes=1),provider)==[]
     assert len(provider.calls)==9  # no extra market requests on same slot
-    assert len(tick_once(cp,now+timedelta(minutes=31),_stub_source(now+timedelta(minutes=31))))==1
+    next_slot=now+timedelta(minutes=5)
+    assert len(tick_once(cp,next_slot,_stub_source(next_slot)))==1
+    assert (tmp_path/'output'/'20261009_1505'/'cross_non_jpy'/'GBPAUD.png').exists()
 
 
 def test_local_closed_market_makes_no_png(tmp_path):

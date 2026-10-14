@@ -1,14 +1,16 @@
 # Created: 2026-10-10 JST
-# FX currency pairs and local Saxo OpenAPI chart output configuration.
-repository: yuki746289/product_chat_record
+# Updated: 2026-10-14 JST — 5分間隔・最新10フォルダ保持
+# 通貨ペア・表示・保存・Saxo認証の公開設定。機密情報は記載しない。
+repository: yuki746289/product_chat_record  # GitHubリポジトリ名（旧Artifactモード用）
 
 provider:
-  type: tradingview_mcp
-  url: https://mcp.tradingview.com/mcp
-  enabled: false
+  type    : tradingview_mcp              # 旧GitHub生成モードの種類（Saxoローカルでは未使用）
+  url     : https://mcp.tradingview.com/mcp  # TradingView MCP接続先（現在は未使用）
+  enabled : false                        # 旧TradingView経由の画像生成を無効化
 
 symbols:
-  # クロス円以外
+  # pair=保存ファイル名・Saxo検索銘柄、category=保存先区分、tradingview=旧モードとの互換設定
+  # クロス円以外（7通貨ペア）
   - {pair: GBPAUD, category: cross_non_jpy, tradingview: FX:GBPAUD}
   - {pair: AUDUSD, category: cross_non_jpy, tradingview: FX:AUDUSD}
   - {pair: GBPUSD, category: cross_non_jpy, tradingview: FX:GBPUSD}
@@ -17,7 +19,7 @@ symbols:
   - {pair: EURUSD, category: cross_non_jpy, tradingview: FX:EURUSD}
   - {pair: GBPNZD, category: cross_non_jpy, tradingview: FX:GBPNZD}
 
-  # クロス円
+  # クロス円（6通貨ペア）
   - {pair: AUDJPY, category: cross_jpy, tradingview: FX:AUDJPY}
   - {pair: GBPJPY, category: cross_jpy, tradingview: FX:GBPJPY}
   - {pair: USDJPY, category: cross_jpy, tradingview: FX:USDJPY}
@@ -26,40 +28,38 @@ symbols:
   - {pair: NZDJPY, category: cross_jpy, tradingview: FX:NZDJPY}
 
 market:
-  skip_stale: true
-  max_1m_age_minutes: 10
+  skip_stale         : true  # 古い1分足しか取得できない通貨ペアは画像生成をスキップ
+  max_1m_age_minutes : 10    # 最新1分足の許容経過時間（分）
 
 chart:
-  timeframes: [1M, 5M, 15M, 1H, 4H, 8H, 1D, 1W, 1Mn]
-  ema: [20, 30, 40]
-  rci: [9, 14, 26]
-  columns: 2
-  bars: 110
-  history_bars: 220
-  right_padding_bars: 12
-  dpi: 110
-  figsize: [19, 25]
-  timezone: Asia/Tokyo
-  theme: dark
+  timeframes         : [1M, 5M, 15M, 1H, 4H, 8H, 1D, 1W, 1Mn]  # 表示する9時間足（並び順固定）
+  ema                : [20, 30, 40]  # EMAの期間
+  rci                : [9, 14, 26]   # RCIの期間
+  columns            : 2              # 画像のチャート列数
+  bars               : 110            # 各時間足の表示本数
+  history_bars       : 220            # EMA/RCI計算用の取得本数
+  right_padding_bars : 12             # チャート右側の余白（本数相当）
+  dpi                : 110            # PNG解像度
+  figsize            : [19, 25]       # 図のサイズ（インチ）
+  timezone           : Asia/Tokyo     # チャート時刻の表示タイムゾーン
+  theme              : dark           # 画像テーマ
 
 output:
-  staging_dir: output
-  timezone: Asia/Tokyo
-  folder_format: '%Y%m%d_%H%M'
-  local_dir: 'C:/TradingViewCharts'
-  artifact_name: charts
-  retention_hours: 8
+  staging_dir   : output             # 旧GitHub生成モードの一時保存先
+  timezone      : Asia/Tokyo         # 日時フォルダ名のタイムゾーン
+  folder_format : '%Y%m%d_%H%M'      # 日時フォルダ名の書式
+  local_dir     : 'C:/TradingViewCharts'  # Windows上のPNG保存先
+  artifact_name : charts             # 旧GitHub Artifactモードでの成果物名
 
-# Do not place secrets or OAuth tokens in this public configuration file.
+# App Key、App Secret、Access/Refresh TokenはWindows資格情報マネージャーに保存する。
 saxo:
-  enabled: true
-  environment: sim
-  redirect_uri: http://localhost:8765/callback
-  price_side: bid
+  enabled      : true                            # Saxoローカル取得を有効化
+  environment  : sim                             # Saxoの接続環境（sim/live）
+  redirect_uri : http://localhost:8765/callback  # OAuth認証の戻り先（登録値と一致させる）
+  price_side   : bid                             # OHLCに使用する価格サイド（bid/ask）
 
 local_monitor:
-  mode: saxo_local
-  poll_seconds: 60
-  chart_interval_minutes: 30
-  retention_hours: 8
-  min_folders: 16
+  mode                   : saxo_local  # Windows常駐の取得方式（Saxo）
+  poll_seconds           : 60          # 状態確認間隔（秒、5分スロットの開始後に取得）
+  chart_interval_minutes : 5           # PNGを新規生成する間隔（分）
+  max_folders            : 10          # 保持する日時フォルダ数の上限（11個目以降を削除）
