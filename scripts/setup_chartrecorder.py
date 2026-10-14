@@ -1,5 +1,6 @@
 # Created: 2026-10-14 JST
 # Updated: 2026-10-14 JST (selectable desktop/c_drive/custom destination)
+# Updated: 2026-10-14 JST (save deployed release ID for version-aware rebuild)
 """Desktop installer bundled as setup.exe; no Saxo credentials are packaged.
 
 The compiled setup.exe contains ChartRecorder.exe and public YAML templates.
@@ -277,6 +278,14 @@ def perform_install(payload, system_path, desktop=None, location_override=None, 
     if location_override is not None:
         system_text = with_install_location(system_text, location_override)
     atomic_write(dest / "system.yaml", system_text)
+    # Installed version metadata is public and contains only a Git release ID.
+    # Old or unversioned setup payloads do not claim to be the current release.
+    release_marker = payload / "release-version.txt"
+    installed_marker = dest / "installed-version.txt"
+    if release_marker.is_file():
+        atomic_copy(release_marker, installed_marker)
+    elif installed_marker.is_file():
+        installed_marker.unlink()
     update_existing_autostart(dest)
     return dest
 
