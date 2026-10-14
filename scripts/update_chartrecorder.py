@@ -67,9 +67,9 @@ def update_install(root, location=None, force_build=False, dry_run=False,
     builder = builder or build_staged_exe
     launcher = launcher or start_installed
 
-    if not already_current or force_build:
+    dirty = is_dirty(root)
+    if not already_current or force_build or dirty:
         # Dirty tracked source code must be rebuilt, not reused under a stable SHA.
-        dirty = is_dirty(root)
         base = release_folder(root, release_id)
         stage = base if not (dirty or force_build) else release_folder(
             root, release_id + "-build-" + uuid4().hex[:8]
