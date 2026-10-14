@@ -3,6 +3,10 @@
 name: Validate ChartRecorder Windows Tray
 on:
   workflow_dispatch:
+  # Temporary push validation for this safety-fix branch; remove before merge.
+  push:
+    branches:
+      - fix/safe-saxo-shutdown-20261014
 permissions:
   contents: read
 jobs:
