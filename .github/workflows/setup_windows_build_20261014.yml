@@ -50,6 +50,12 @@ jobs:
           if (!(Test-Path (Join-Path $target 'setting.yaml'))) { throw 'Installed setting.yaml missing' }
           if (!(Test-Path (Join-Path $target 'system.yaml'))) { throw 'Installed system.yaml missing' }
           if (!(Test-Path (Join-Path $target 'chart_image'))) { throw 'Installed chart_image missing' }
+          $marker = Join-Path $target 'installed-version.txt'
+          if (!(Test-Path $marker)) { throw 'Installed release marker missing' }
+          if ((Get-Content $marker -Raw) -notmatch '^v0\.1\.0-[0-9a-f]{7,8}') { throw 'Invalid release marker' }
+          $releases = @(Get-ChildItem 'dist\\releases' -Directory -ErrorAction Stop)
+          if ($releases.Count -lt 1) { throw 'Versioned EXE output missing' }
+          if (!(Test-Path (Join-Path $releases[0].FullName 'ChartRecorder.exe'))) { throw 'Staged ChartRecorder EXE missing' }
           $recorded = Get-Content (Join-Path $target 'system.yaml') -Raw
           if ($recorded -notmatch [regex]::Escape($parent)) { throw 'Selected install path not persisted' }
           $settings = Get-Content (Join-Path $target 'setting.yaml') -Raw

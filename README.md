@@ -50,6 +50,8 @@ in Windows Credential Manager.
 
 Build `setup.exe` with `scripts\\build_setup_windows.bat` (or obtain the validated Windows Actions setup artifact). The setup dialog lets you choose **desktop** (default), **c_drive** (`C:/ChartRecorder`), or a custom absolute parent folder. The same options are available using `setup.exe --location ... --yes`. It installs `ChartRecorder.exe`, `setting.yaml`, `system.yaml` and `chart_image/` under that selected location. The destination is configured in `system.yaml`, not hardcoded to the Git repository path. New images are written to `chart_image`; previously saved `C:/TradingViewCharts` images are not removed or silently relocated. The installer never bundles Saxo credentials and does not force-kill the running app.
 
+For a one-command versioned update that preserves active Saxo captures, use `cmd.exe /c 'scripts\\update_chartrecorder.bat --location c_drive'`. It builds to a version-stamped directory before cooperatively stopping and restarting the tray app. Do not force-kill Saxo workers or rerun the old in-place EXE build during capture.
+
 Details and update procedure: [Windows Desktop setup guide](docs/WINDOWS_DESKTOP_SETUP_20261014.md).
 
 ## Recommended: Saxo local Windows mode (SIM-first)

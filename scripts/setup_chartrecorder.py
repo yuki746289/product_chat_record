@@ -1,5 +1,7 @@
 # Created: 2026-10-14 JST
 # Updated: 2026-10-14 JST (selectable desktop/c_drive/custom destination)
+# Updated: 2026-10-14 JST (save deployed release ID for version-aware rebuild)
+# Updated: 2026-10-14 JST (cooperative stop and restart for running apps)
 """Desktop installer bundled as setup.exe; no Saxo credentials are packaged.
 
 The compiled setup.exe contains ChartRecorder.exe and public YAML templates.
@@ -17,6 +19,8 @@ import subprocess
 import sys
 
 import yaml
+
+from scripts.cooperative_shutdown import CooperativeShutdown
 
 
 def bundled_payload():
@@ -277,6 +281,14 @@ def perform_install(payload, system_path, desktop=None, location_override=None, 
     if location_override is not None:
         system_text = with_install_location(system_text, location_override)
     atomic_write(dest / "system.yaml", system_text)
+    # Installed version metadata is public and contains only a Git release ID.
+    # Old or unversioned setup payloads do not claim to be the current release.
+    release_marker = payload / "release-version.txt"
+    installed_marker = dest / "installed-version.txt"
+    if release_marker.is_file():
+        atomic_copy(release_marker, installed_marker)
+    elif installed_marker.is_file():
+        installed_marker.unlink()
     update_existing_autostart(dest)
     return dest
 
@@ -323,14 +335,16 @@ def main(argv=None):
             "既存の画像フォルダは移動・削除しません。"
         ):
             return 0
+        # Stop the old app only after the payload and target have been validated.
+        # Its named event waits for all Saxo workers before releasing the mutex.
+        was_running = CooperativeShutdown().stop(timeout_seconds=300) if os.name == "nt" else False
         installed = perform_install(payload, system_path, location_override=location)
         print(f"Installed: {installed}")
-        if gui:
-            if messagebox.askyesno(
-                "ChartRecorder Setup",
-                f"インストールが完了しました。\n{installed}\n\nChartRecorder を起動しますか？"
-            ):
-                subprocess.Popen([str(installed / "ChartRecorder.exe")], cwd=str(installed))
+        if was_running or (gui and messagebox.askyesno(
+            "ChartRecorder Setup",
+            f"インストールが完了しました。\n{installed}\n\nChartRecorder を起動しますか？"
+        )):
+            subprocess.Popen([str(installed / "ChartRecorder.exe")], cwd=str(installed))
         return 0
     except Exception as exc:
         if gui:
