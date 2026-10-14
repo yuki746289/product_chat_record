@@ -1,1 +1,0 @@
-Trigger one-time public Windows regression, test pystray Win32 backend and build bundled EXE; no Saxo tokens/API use.
