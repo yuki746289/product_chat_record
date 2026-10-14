@@ -3,6 +3,7 @@
 # Updated: 2026-10-12 JST (Saxo re-login notification and recovery)
 # Updated: 2026-10-14 JST (make tray icon visible in custom pystray setup)
 # Updated: 2026-10-14 JST (friendly single-instance dialog and cooperative restart)
+# Updated: 2026-10-14 JST (hold Saxo mutex through polling and login shutdown)
 """Windows system-tray watcher for Chart Recorder (no global background daemon)."""
 import argparse
 import logging
@@ -102,6 +103,7 @@ class TrayController:
         self.instance_guard = None
         self.instance_watcher = None
         self.worker = None
+        self.login_worker = None
         self.local_dir.mkdir(parents=True, exist_ok=True)
         self.logger = logging.getLogger("chart_recorder")
         self.logger.setLevel(logging.INFO)
@@ -209,8 +211,13 @@ class TrayController:
         finally:
             self.stopping.set()
             self.wake.set()
+            # Never release the Saxo mutex while either worker can still access
+            # the credential vault or API. A capture may take over five seconds;
+            # the replacement launcher will time out safely if shutdown is slow.
             if self.worker is not None:
-                self.worker.join(timeout=5)
+                self.worker.join()
+            if getattr(self, "login_worker", None) is not None:
+                self.login_worker.join()
             if getattr(self, "instance_watcher", None) is not None:
                 self.instance_watcher.join(timeout=1)
             if getattr(self, "instance_guard", None) is not None:
@@ -252,7 +259,10 @@ class TrayController:
         self.paused = True
         self._status("Saxo再ログイン中（ブラウザで認証）")
         # Browser login must never block the tray UI thread.
-        threading.Thread(target=self._run_saxo_login, daemon=True, name="SaxoBrowserLogin").start()
+        self.login_worker = threading.Thread(
+            target=self._run_saxo_login, daemon=True, name="SaxoBrowserLogin"
+        )
+        self.login_worker.start()
 
     def _run_saxo_login(self):
         try:
