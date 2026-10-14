@@ -1,4 +1,5 @@
 # Created: 2026-10-12 JST
+# Updated: 2026-10-14 JST (retain existing browser login tests with first-run setup)
 """Saxo expired-token tray notification and manual login recovery tests."""
 import threading
 from types import SimpleNamespace
@@ -108,6 +109,7 @@ def test_browser_login_success_resumes_capture_immediately(tmp_path, monkeypatch
     login = Mock(return_value=True)
     monkeypatch.setattr(tray_app, "SaxoSession", lambda _: SimpleNamespace(sign_in_interactively=login))
     monkeypatch.setattr(tray_app, "load_settings", lambda _: {"saxo": {"environment": "sim"}})
+    monkeypatch.setattr(tray_app, "ensure_app_credentials", lambda environment: True)
     app._run_saxo_login()
     login.assert_called_once_with()
     assert not app.login_required
@@ -125,6 +127,7 @@ def test_browser_login_failure_preserves_relogin_state(tmp_path, monkeypatch):
     app.paused = True
     monkeypatch.setattr(tray_app, "load_settings", lambda _: {})
     monkeypatch.setattr(tray_app, "SaxoSession", Mock(side_effect=RuntimeError("Browser unavailable")))
+    monkeypatch.setattr(tray_app, "ensure_app_credentials", lambda environment: True)
     app._run_saxo_login()
     assert app.login_required
     assert not app.login_in_progress
