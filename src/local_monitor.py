@@ -1,10 +1,10 @@
 # Created: 2026-10-10 10:35 JST
-"""GitHub artifact downloader and conservative local retention for Windows.
+"""GitHub artifact downloader and count-limited local retention for Windows.
 
 Runs one polling pass; UI and Python CLI can call poll_once(). No background jobs
 are created by this module. All times are timezone-aware.
 """
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 import json
 from pathlib import Path
 import re
@@ -32,14 +32,14 @@ def get_monitor_options(cfg):
     if not isinstance(opts, dict):
         raise ValueError("local_monitor must be a mapping")
     poll = opts.get("poll_seconds", 60)
-    hours = opts.get("retention_hours", 8)
-    minimum = opts.get("min_folders", 16)
+    maximum = opts.get("max_folders", 10)
+    if "retention_hours" in opts or "min_folders" in opts:
+        raise ValueError("Deprecated local_monitor retention_hours/min_folders; use max_folders")
     for name, value, low, high in (("poll_seconds", poll, 30, 3600),
-                                    ("retention_hours", hours, 1, 168),
-                                    ("min_folders", minimum, 1, 1000)):
+                                   ("max_folders", maximum, 1, 1000)):
         if isinstance(value, bool) or not isinstance(value, int) or not low <= value <= high:
             raise ValueError(f"local_monitor.{name} must be an integer from {low} to {high}")
-    return poll, hours, minimum
+    return poll, maximum
 
 
 def parse_chart_stamp(name, time_zone):
@@ -55,11 +55,11 @@ def parse_chart_stamp(name, time_zone):
         return None
 
 
-def clean_local_images(local_dir, now, retention_hours=8, min_folders=16, time_zone="Asia/Tokyo"):
-    """Keep folders from last N hours OR most recent M; never touch other dirs.
+def clean_local_images(local_dir, now, max_folders=10, time_zone="Asia/Tokyo"):
+    """Retain at most the newest N timestamp folders containing PNGs.
 
-    A valid snapshot folder has YYYYMMDD_HHmm and at least one PNG. This avoids
-    deleting unrelated folders under user-configured storage.
+    A snapshot folder has YYYYMMDD_HHmm and at least one direct/category PNG.
+    Unknown names, empty folders, and symlinks are not deleted.
     """
     if now.tzinfo is None:
         raise ValueError("now must be timezone-aware")
@@ -80,10 +80,11 @@ def clean_local_images(local_dir, now, retention_hours=8, min_folders=16, time_z
         if local_dt is not None and (direct or categorized):
             candidates.append((local_dt.astimezone(timezone.utc), entry))
     candidates.sort(key=lambda item: (item[0], item[1].name), reverse=True)
-    cutoff = now.astimezone(timezone.utc) - timedelta(hours=retention_hours)
+    if isinstance(max_folders, bool) or not isinstance(max_folders, int) or max_folders < 1:
+        raise ValueError("max_folders must be a positive integer")
     deleted = []
     for index, (stamp, directory_path) in enumerate(candidates):
-        if index >= min_folders and stamp < cutoff:
+        if index >= max_folders:
             shutil.rmtree(directory_path)
             deleted.append(directory_path)
     return deleted
@@ -165,7 +166,7 @@ def poll_once(config_path, now=None):
     so the next poll retries it. No duplicate folder is made for the same ID.
     """
     cfg = load_settings(config_path)
-    _, hours, minimum = get_monitor_options(cfg)
+    _, maximum = get_monitor_options(cfg)
     now = now or datetime.now(timezone.utc)
     if now.tzinfo is None:
         raise ValueError("now must be timezone-aware")
@@ -178,15 +179,8 @@ def poll_once(config_path, now=None):
     downloaded = []
     try:
         available = get_recent_artifacts(repo, artifact_name)
-        # On first install (or after long downtime), download only the newest
-        # 16 snapshots and any additional ones from the last eight hours.
-        cutoff = now.astimezone(timezone.utc) - timedelta(hours=hours)
-        selected = []
-        for index, artifact in enumerate(reversed(available)):
-            created = datetime.fromisoformat(artifact["created_at"].replace("Z", "+00:00"))
-            if index < minimum or created >= cutoff:
-                selected.append(artifact)
-        selected.reverse()
+        # Backfill only the latest N artifacts, matching local folder cap.
+        selected = available[-maximum:]
         processed.intersection_update({int(a["id"]) for a in available})
         for artifact in selected:
             artifact_id = int(artifact["id"])
@@ -212,5 +206,5 @@ def poll_once(config_path, now=None):
                 _save_state(root, processed)
     finally:
         # Cleanup runs even with no new images or if GitHub is temporarily down.
-        clean_local_images(root, now, hours, minimum, cfg["output"]["timezone"])
+        clean_local_images(root, now, maximum, cfg["output"]["timezone"])
     return downloaded

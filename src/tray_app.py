@@ -82,7 +82,7 @@ class TrayController:
     def __init__(self, config_path):
         self.config_path = Path(config_path).resolve()
         config = load_settings(self.config_path)
-        self.interval, _, _ = get_monitor_options(config)
+        self.interval, _ = get_monitor_options(config)
         self.mode = config.get("local_monitor", {}).get("mode", "github")
         if self.mode not in ("github", "saxo_local"):
             raise ValueError("local_monitor.mode must be github or saxo_local")
