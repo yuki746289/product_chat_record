@@ -3,11 +3,6 @@
 name: Validate ChartRecorder Windows Tray
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - fix/tray-icon-visible-20261014
-    paths:
-      - .github/test-request/tray-win32-smoke-20261014.txt
 permissions:
   contents: read
 jobs:
