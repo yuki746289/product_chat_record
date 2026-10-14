@@ -4,6 +4,7 @@
 # Updated: 2026-10-14 JST (make tray icon visible in custom pystray setup)
 # Updated: 2026-10-14 JST (friendly single-instance dialog and cooperative restart)
 # Updated: 2026-10-14 JST (hold Saxo mutex through polling and login shutdown)
+# Updated: 2026-10-14 JST (first-run Saxo App Key/Secret UI without requiring Python)
 """Windows system-tray watcher for Chart Recorder (no global background daemon)."""
 import argparse
 import logging
@@ -19,6 +20,7 @@ from .config import load_settings
 from .local_monitor import get_monitor_options, poll_once
 from .saxo_local import tick_once
 from .saxo_auth import SaxoSession, SaxoLoginRequired
+from .saxo_first_run import ensure_app_credentials
 from .windows_single_instance import WindowsSingleInstance
 
 APP_NAME = "ChartRecorder"
@@ -266,7 +268,14 @@ class TrayController:
 
     def _run_saxo_login(self):
         try:
-            session = SaxoSession(load_settings(self.config_path))
+            cfg = load_settings(self.config_path)
+            # A new PC has no Saxo app credentials in its Windows vault.
+            # Show a masked first-run dialog from this worker (never the tray
+            # event loop), then keep the existing browser-based Saxo login.
+            if not ensure_app_credentials(cfg["saxo"]["environment"]):
+                self._status("Saxo初期設定をキャンセル（右クリックして再試行）")
+                return
+            session = SaxoSession(cfg)
             session.sign_in_interactively()
             self.login_required = False
             self.auth_notice_sent = False
