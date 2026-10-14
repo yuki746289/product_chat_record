@@ -83,6 +83,27 @@ Headless dry-run on a local Windows shell:
 dist\setup.exe --dry-run --yes
 ```
 
+## Versioned safe rebuild and restart (2026-10-14)
+
+**Recommended command (Git Bash in repository root):**
+
+```bash
+cd /c/Users/yuki_/OneDrive/Documents/github/product_chat_record
+git switch main
+git pull --ff-only origin main
+cmd.exe /c 'scripts\\update_chartrecorder.bat --location c_drive'
+```
+
+Use `--location desktop` for Desktop/ChartRecorder, or an absolute parent path such as `--location "D:/Apps"`. The default location comes from `system.yaml`. If the EXE and `installed-version.txt` already match the current release, the updater **skips the rebuild**, but still safely restarts the app. To explicitly recompile, pass `--rebuild`; use `--dry-run` to inspect the target without stopping it.
+
+The release ID is `VERSION` (semantic version, currently 0.1.0) plus the eight-character Git commit SHA, e.g. `v0.1.0-abcdefgh`. New builds go to `dist/releases/<release-id>/ChartRecorder.exe` and **never overwrite** the running `dist/ChartRecorder.exe`. The updater copies the versioned binary into the selected installation folder only after a cooperative stop. No Saxo tokens or secrets are ever included in release artifacts or in `installed-version.txt`.
+
+Update order: **build to a separate versioned folder → request shutdown using the existing named Windows event → wait until the mutex disappears (including any in-flight market-data capture or Saxo login) → install atomically → launch**. This is deliberately safer than stopping the app first, because compilation failures do not interrupt chart capture.
+
+On a legacy executable lacking the cooperative event, or if processing fails to stop within five minutes, the updater **refuses to force-kill**. Exit the old app from the tray manually, then rerun the command. It never starts concurrent Saxo workers. If installation fails after shutdown, it attempts to restore and launch the previous installed executable.
+
+`scripts/build_setup_windows.bat` also stages the app binary by version before building `dist/setup.exe`. The installer now cooperatively stops an existing modern instance, installs the new app, and restarts it. The old data directory is never migrated or deleted.
+
 ## Limitations
 
 - Windows GUI installation / same-user Saxo vault reuse needs Windows **real-PC** verification; a headless runner cannot confirm task-tray behavior.
