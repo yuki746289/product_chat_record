@@ -34,18 +34,24 @@ jobs:
           $parent = $env:RUNNER_TEMP.Replace('\', '/')
           $config = @(
             'install:'
-            "  location: '$parent'"
+            '  location: desktop'
             '  folder_name: ChartRecorderSmoke'
             '  image_folder: chart_image'
           )
           $config | Set-Content -Path 'dist\system.yaml' -Encoding utf8
-          $installed = Start-Process -FilePath $setup -ArgumentList '--yes' -Wait -PassThru
+          foreach ($preset in @('desktop', 'c_drive')) {
+            $check = Start-Process -FilePath $setup -ArgumentList '--dry-run', '--yes', '--location', $preset -Wait -PassThru
+            if ($check.ExitCode -ne 0) { throw "Preset $preset dry-run failed: $($check.ExitCode)" }
+          }
+          $installed = Start-Process -FilePath $setup -ArgumentList '--yes', '--location', $parent -Wait -PassThru
           if ($installed.ExitCode -ne 0) { throw "Packaged installer failed: $($installed.ExitCode)" }
           $target = Join-Path $env:RUNNER_TEMP 'ChartRecorderSmoke'
           if (!(Test-Path (Join-Path $target 'ChartRecorder.exe'))) { throw 'Installed EXE missing' }
           if (!(Test-Path (Join-Path $target 'setting.yaml'))) { throw 'Installed setting.yaml missing' }
           if (!(Test-Path (Join-Path $target 'system.yaml'))) { throw 'Installed system.yaml missing' }
           if (!(Test-Path (Join-Path $target 'chart_image'))) { throw 'Installed chart_image missing' }
+          $recorded = Get-Content (Join-Path $target 'system.yaml') -Raw
+          if ($recorded -notmatch [regex]::Escape($parent)) { throw 'Selected install path not persisted' }
           $settings = Get-Content (Join-Path $target 'setting.yaml') -Raw
           if ($settings -notmatch "local_dir\s*:\s*'chart_image'") { throw 'Installed output directory is not portable' }
           Remove-Item 'dist\system.yaml' -Force
