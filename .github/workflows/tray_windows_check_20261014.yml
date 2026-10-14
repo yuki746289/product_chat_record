@@ -3,6 +3,10 @@
 name: Validate ChartRecorder Windows Tray
 on:
   workflow_dispatch:
+  # Temporary CI trigger for this correction; removed before merging.
+  push:
+    branches:
+      - fix/saxo-per-pair-freshness-clock-20261014
 permissions:
   contents: read
 jobs:
