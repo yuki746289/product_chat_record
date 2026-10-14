@@ -37,8 +37,8 @@ C:/TradingViewCharts/
       EURJPY.png  CADJPY.png  NZDJPY.png
 ```
 
-Retention is evaluated at the timestamp-folder level: preserve **every folder
-as the newest **10 timestamp folders**, deleting older batches.
+Retention is evaluated at the timestamp-folder level: retain **only the newest
+10 timestamp folders** with PNGs, deleting older batches.
 Existing top-level timestamp folders with PNGs are also recognized. The legacy
 GitHub Artifact downloader accepts both category-layout and flat images.
 
@@ -241,15 +241,14 @@ local_monitor:
 
 After every poll, preserve **only the newest 10 timestamp folders** with PNGs,
 even across weekends/market holidays. Delete older folders matching
-`YYYYMMDD_HHmm` that contain PNGs and violate both retention criteria.
+`YYYYMMDD_HHmm` that contain PNGs and exceed the folder-count limit.
 Unknown folder names are never deleted. Images remain at
-`<output.local_dir>\yyyyMMdd_HHmm\<currency_pair>.png`.
+`<output.local_dir>\yyyyMMdd_HHmm\<category>\<currency_pair>.png`.
 A folder can have fewer pairs when TradingView returns fresh data for only
 some symbols. A `.downloaded_artifacts.json` file prevents repeat downloads.
 
 The app backfills only the **latest 10 available unprocessed** GitHub artifacts,
-in oldest-first order. Images
-already expired or deleted from GitHub cannot be recovered. An interruption
+in oldest-first order. Images already expired or deleted from GitHub cannot be recovered. An interruption
 keeps the last successful images and retries missing downloads. No images are
 created locally during a market closure when no new GitHub artifacts exist.
 The local limit of 10 timestamp folders does not change GitHub Artifact retention.
