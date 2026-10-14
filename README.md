@@ -151,6 +151,27 @@ used; no trading permissions or order endpoints are required.
 Detailed implementation and outstanding verification:
 [docs/SAXO_LOCAL_IMPLEMENTATION_20261010.md](docs/SAXO_LOCAL_IMPLEMENTATION_20261010.md).
 
+### Windows duplicate launch dialog (2026-10-14)
+
+If ChartRecorder is already running, a second Windows EXE launch displays a
+native Japanese Yes/No dialog instead of a Python traceback:
+
+- **Yes**: ask the existing instance to shut down, wait for its original
+  single-instance mutex to disappear (up to 20 seconds), then start the
+  replacement. Saxo token refresh is **never** run in two app instances.
+- **No**: exit the new launch normally and keep the existing instance.
+- **Old version**: older EXEs and earlier Python instances do not support the
+  shutdown event. The new EXE displays a separate message and leaves the
+  existing process alone; exit it manually once before the first update.
+- **Timeout/failure**: show an informational message and do not force-kill
+  another process or start in parallel.
+
+The restart event and mutex are **Windows session-local**. The application
+does not need administrator privileges or a network connection for this dialog.
+Rebuild `dist/ChartRecorder.exe` after pulling this code. The first transition
+from an old running version still requires one manual exit; subsequent launches
+with this version can replace the running version through the dialog.
+
 ### Windows tray icon visibility (2026-10-14 fix)
 
 When a custom `pystray.Icon.run(setup=...)` callback is supplied, the callback
