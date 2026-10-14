@@ -1,8 +1,10 @@
 # Created: 2026-10-10 JST
+# Updated: 2026-10-14 JST (per-pair realtime freshness check and skip diagnostics)
 """Local Saxo chart captures: 5-minute snapshots and count-limited retention."""
 import argparse
 from datetime import datetime, timezone
 import json
+import logging
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -48,17 +50,21 @@ def _save_last_success(root,slot):
     temp.replace(path)
 
 
-def tick_once(config_path, now=None, provider=None):
-    """Called on each tray poll; refresh token and generate at most once/slot.
+def tick_once(config_path, now=None, provider=None, clock=None):
+    """Capture once per 5-minute slot, checking data age when each pair arrives.
 
-    Only the listed configured pairs are written, and stale pairs are skipped.
-    If data is unavailable, the slot stays eligible for retry on the next poll.
+    The folder/slot stays anchored to the initial timestamp; freshness must not
+    compare the final pairs against that potentially minutes-old initial time.
+    Explicit now is a fixed test/replay timestamp; clock permits a
+    deterministic advancing clock in tests without network calls.
     """
     cfg=load_settings(config_path)
     sax,period=get_saxo_config(cfg)
     if not sax.get('enabled',False):
         raise RuntimeError('Saxo local provider disabled. Complete OAuth setup, then set saxo.enabled: true')
-    now=now or datetime.now(timezone.utc)
+    clock=clock or (lambda: datetime.now(timezone.utc))
+    fixed_now=now is not None
+    now=now if fixed_now else clock()
     if now.tzinfo is None:
         raise ValueError('now must be timezone-aware')
     now=now.astimezone(timezone.utc)
@@ -77,12 +83,18 @@ def tick_once(config_path, now=None, provider=None):
         folder=root/stamp
         generated=[]
         errors=[]
+        skipped_stale=[]
         for item in cfg['symbols']:
             pair=item['pair']
             try:
                 frames={}
                 one=source.get(pair,'1M',cfg['chart']['history_bars'])
-                if not is_fresh_minute_candle(one,now,cfg['market']['max_1m_age_minutes']):
+                # Chart generation is sequential. Pair 10 may be fetched minutes
+                # after the first pair, so do not use the snapshot start time here.
+                freshness_now=now if fixed_now else clock()
+                if not is_fresh_minute_candle(one,freshness_now,cfg['market']['max_1m_age_minutes']):
+                    latest=one.index.max().isoformat() if not one.empty else 'none'
+                    skipped_stale.append(f'{pair}: latest_1m={latest}, checked_at={freshness_now.isoformat()}')
                     continue
                 frames['1M']=one
                 for tf in EXPECTED_TIMEFRAMES:
@@ -105,6 +117,11 @@ def tick_once(config_path, now=None, provider=None):
             # Partial output is kept; retry other pairs next tick in this slot.
             # Avoid marking completed until all pairs either succeeded or are closed.
             raise RuntimeError('Some Saxo pairs failed: '+'; '.join(errors))
+        if generated and skipped_stale:
+            # No credentials, bearer tokens, or Saxo payloads in diagnostic logs.
+            logging.getLogger('chart_recorder').warning(
+                'Incomplete Saxo snapshot slot=%s: %d/%d images; stale 1M skipped: %s',
+                stamp,len(generated),len(cfg['symbols']),'; '.join(skipped_stale))
         if generated:
             _save_last_success(root,slot)
         return generated
