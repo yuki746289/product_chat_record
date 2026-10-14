@@ -19,7 +19,7 @@ import time
 from .config import load_settings
 from .local_monitor import get_monitor_options, poll_once
 from .saxo_local import tick_once
-from .saxo_auth import SaxoSession, SaxoLoginRequired
+from .saxo_auth import SaxoSession, SaxoLoginRequired, credentials
 from .saxo_first_run import ensure_app_credentials
 from .windows_single_instance import WindowsSingleInstance
 
@@ -253,6 +253,24 @@ class TrayController:
                 target=self.poll_loop, name="ChartLocalPolling", daemon=True
             )
             self.worker.start()
+        # A fresh installed Windows PC needs App Key/Secret exactly once.
+        # When already configured, even an expired browser session stays a
+        # manual tray re-login, preserving the existing user experience.
+        if self.mode == "saxo_local" and os.name == "nt" and getattr(sys, "frozen", False):
+            self._prompt_initial_saxo_setup()
+
+    def _prompt_initial_saxo_setup(self):
+        """Open the initial credential dialog only when the vault is empty."""
+        if self.login_in_progress or self.stopping.is_set():
+            return
+        try:
+            cfg = load_settings(self.config_path)
+            credentials(cfg["saxo"]["environment"])
+        except SaxoLoginRequired:
+            self.start_saxo_login(None, None)
+        except Exception:
+            self.logger.exception("Could not inspect Saxo app setup state")
+            self._status("Saxo初期設定の確認エラー（ログを確認）")
 
     def start_saxo_login(self, icon, item):
         if self.mode != "saxo_local" or self.login_in_progress:
