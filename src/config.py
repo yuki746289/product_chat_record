@@ -1,6 +1,7 @@
 # Created: 2026-10-09 22:09 JST
+# Updated: 2026-10-14 JST (resolve relative image directory beside setting.yaml)
 """Load validated chart settings."""
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 import re
 import yaml
 
@@ -11,6 +12,14 @@ def load_settings(path):
     cfg = yaml.safe_load(source.read_text(encoding='utf-8'))
     if not isinstance(cfg, dict):
         raise ValueError('setting.yaml must contain a mapping')
+    # Portable desktop installations specify output.local_dir: chart_image.
+    # Resolve relative to setting.yaml rather than the caller's working directory.
+    output = cfg.get('output', {})
+    if isinstance(output, dict):
+        local_dir = output.get('local_dir')
+        if isinstance(local_dir, str) and local_dir.strip():
+            if not Path(local_dir).is_absolute() and not PureWindowsPath(local_dir).is_absolute():
+                output['local_dir'] = str((source.resolve().parent / local_dir).resolve())
     symbols = cfg.get('symbols', [])
     if not isinstance(symbols, list) or not symbols:
         raise ValueError('symbols must be a non-empty list')
