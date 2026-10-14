@@ -7,3 +7,8 @@ output/
 .env
 *.token
 *.log
+
+# Created: 2026-10-14 JST (generated Windows installation binaries)
+dist/
+build/
+*.spec
