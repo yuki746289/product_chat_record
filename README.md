@@ -151,6 +151,32 @@ used; no trading permissions or order endpoints are required.
 Detailed implementation and outstanding verification:
 [docs/SAXO_LOCAL_IMPLEMENTATION_20261010.md](docs/SAXO_LOCAL_IMPLEMENTATION_20261010.md).
 
+### Windows tray icon visibility (2026-10-14 fix)
+
+When a custom `pystray.Icon.run(setup=...)` callback is supplied, the callback
+must set `icon.visible = True`; otherwise the polling thread can keep running
+with **no visible icon**, and subsequent launches fail the single-instance
+mutex check. The setup now makes the icon visible **before** starting polling;
+failed icon registration is logged and stops the application instead of
+leaving an inaccessible background process.
+
+After pulling a new version, exit the old ChartRecorder process, rebuild and
+start the EXE again. If the old icon cannot be used, Git Bash can stop it:
+
+```bash
+powershell.exe -NoProfile -Command "Get-Process ChartRecorder -ErrorAction SilentlyContinue | Stop-Process -Force"
+cmd.exe /c 'scripts\\build_windows.bat'
+./dist/ChartRecorder.exe
+```
+
+Check `C:/TradingViewCharts/.chart_recorder.log` for
+`Tray icon initialized and visible`. Saxo authentication may remain expired,
+in which case the icon should still appear with a **Saxo re-login required**
+menu entry; **re-login is not required to open the tray UI**. Confirm the
+actual icon in the Windows notification overflow (the taskbar's `^` menu).
+Windows GUI display itself cannot be verified by a headless Actions runner.
+
+
 ### GitHub mode (legacy/test-only)
 
 The existing GitHub Artifact download mode is still available by setting
