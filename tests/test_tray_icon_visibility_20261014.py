@@ -127,6 +127,7 @@ def test_run_wires_custom_setup_to_visible_icon(monkeypatch):
 def test_expired_saxo_token_does_not_hide_tray_icon(monkeypatch):
     app = make_controller()
     icon = FakeIcon()
+    app.icon = icon
 
     def expired(_):
         raise SaxoLoginRequired("expired test token")
