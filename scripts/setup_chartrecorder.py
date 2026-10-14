@@ -111,7 +111,6 @@ def choose_install_location(initial, config, parent_window):
     popup.title("ChartRecorder - インストール先の選択")
     popup.resizable(False, False)
     popup.geometry("570x245")
-    popup.grab_set()
     selection = {"value": None}
     options = {
         "デスクトップ (desktop)": "desktop",
@@ -177,6 +176,8 @@ def choose_install_location(initial, config, parent_window):
     ttk.Button(buttons, text="インストール", command=accept).pack(side="left")
     popup.protocol("WM_DELETE_WINDOW", popup.destroy)
     refresh()
+    popup.wait_visibility()
+    popup.grab_set()
     popup.wait_window()
     return selection["value"]
 
