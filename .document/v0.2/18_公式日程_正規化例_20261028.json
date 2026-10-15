@@ -1,0 +1,169 @@
+{
+  "schema_version": 1,
+  "report_date_jst": "2026-10-28",
+  "generated_at_utc": "2026-10-15T09:14:52.596Z",
+  "master_policy_version": "2026-10-15.1",
+  "sample_only": false,
+  "acquisition": {
+    "provider": "MULTI_OFFICIAL_MANUAL_VERIFICATION",
+    "fetch_status": "PARTIAL",
+    "coverage_status": "INCOMPLETE",
+    "license_status": "PENDING",
+    "range_start_utc": "2026-10-27T15:00:00Z",
+    "range_end_utc_exclusive": "2026-10-28T15:00:00Z",
+    "requested_countries": [
+      "US",
+      "JP",
+      "EU",
+      "DE",
+      "GB",
+      "AU",
+      "NZ",
+      "CA"
+    ],
+    "reported_countries": [
+      "AU",
+      "NZ",
+      "CA"
+    ],
+    "fetched_at_utc": "2026-10-15T09:14:52.599Z"
+  },
+  "events": [
+    {
+      "record_id": "OFFICIAL_SCHEDULE:AU:AU_CPI:2026-10-28",
+      "source_record_id": "derived:AU:AU_CPI:2026-10-28",
+      "country": "AU",
+      "currency": "AUD",
+      "title_raw": "Consumer Price Index, Australia",
+      "date_utc": "2026-10-28T00:30:00Z",
+      "date_jst": "2026-10-28T09:30:00+09:00",
+      "time_precision": "EXACT",
+      "provider_importance": {
+        "scheme": "OFFICIAL_SCHEDULE_NO_IMPORTANCE_RATING",
+        "value": null
+      },
+      "master_indicator_id": "AU_CPI",
+      "rank": "S",
+      "match_status": "MATCHED",
+      "release_status": "SCHEDULED",
+      "values": {
+        "previous": null,
+        "forecast": null,
+        "actual": null,
+        "revised_previous": null,
+        "unit": null,
+        "scale": null
+      },
+      "first_party": {
+        "organization": "Australian Bureau of Statistics",
+        "url": "https://www.abs.gov.au/release-calendar/future-releases/202610/rcc_economy",
+        "verified": false
+      }
+    },
+    {
+      "record_id": "OFFICIAL_SCHEDULE:NZ:NZ_RBNZ_RATE:2026-10-28",
+      "source_record_id": "derived:NZ:NZ_RBNZ_RATE:2026-10-28",
+      "country": "NZ",
+      "currency": "NZD",
+      "title_raw": "Monetary Policy Review and OCR October 2026",
+      "date_utc": "2026-10-28T01:00:00Z",
+      "date_jst": "2026-10-28T10:00:00+09:00",
+      "time_precision": "EXACT",
+      "provider_importance": {
+        "scheme": "OFFICIAL_SCHEDULE_NO_IMPORTANCE_RATING",
+        "value": null
+      },
+      "master_indicator_id": "NZ_RBNZ_RATE",
+      "rank": "S",
+      "match_status": "MATCHED",
+      "release_status": "SCHEDULED",
+      "values": {
+        "previous": null,
+        "forecast": null,
+        "actual": null,
+        "revised_previous": null,
+        "unit": null,
+        "scale": null
+      },
+      "first_party": {
+        "organization": "Reserve Bank of New Zealand",
+        "url": "https://www.rbnz.govt.nz/news-and-events/events/2026/october/monetary-policy-review-and-ocr-october-2026",
+        "verified": false
+      }
+    },
+    {
+      "record_id": "OFFICIAL_SCHEDULE:CA:CA_BOC_RATE:2026-10-28",
+      "source_record_id": "derived:CA:CA_BOC_RATE:2026-10-28",
+      "country": "CA",
+      "currency": "CAD",
+      "title_raw": "Policy interest rate announcements",
+      "date_utc": "2026-10-28T13:45:00Z",
+      "date_jst": "2026-10-28T22:45:00+09:00",
+      "time_precision": "EXACT",
+      "provider_importance": {
+        "scheme": "OFFICIAL_SCHEDULE_NO_IMPORTANCE_RATING",
+        "value": null
+      },
+      "master_indicator_id": "CA_BOC_RATE",
+      "rank": "S",
+      "match_status": "MATCHED",
+      "release_status": "SCHEDULED",
+      "values": {
+        "previous": null,
+        "forecast": null,
+        "actual": null,
+        "revised_previous": null,
+        "unit": null,
+        "scale": null
+      },
+      "first_party": {
+        "organization": "Bank of Canada",
+        "url": "https://www.bankofcanada.ca/2026/07/bank-canada-publishes-2027-schedule-policy-interest-rate-announcements-other-major-publications/",
+        "verified": false
+      }
+    }
+  ],
+  "display_groups": [
+    {
+      "group_key": "AUD|AU_CPI|2026-10-28T00:30:00Z",
+      "currency": "AUD",
+      "master_indicator_id": "AU_CPI",
+      "rank": "S",
+      "display_name_ja": "豪CPI",
+      "date_jst": "2026-10-28T09:30:00+09:00",
+      "record_ids": [
+        "OFFICIAL_SCHEDULE:AU:AU_CPI:2026-10-28"
+      ]
+    },
+    {
+      "group_key": "NZD|NZ_RBNZ_RATE|2026-10-28T01:00:00Z",
+      "currency": "NZD",
+      "master_indicator_id": "NZ_RBNZ_RATE",
+      "rank": "S",
+      "display_name_ja": "RBNZ政策金利",
+      "date_jst": "2026-10-28T10:00:00+09:00",
+      "record_ids": [
+        "OFFICIAL_SCHEDULE:NZ:NZ_RBNZ_RATE:2026-10-28"
+      ]
+    },
+    {
+      "group_key": "CAD|CA_BOC_RATE|2026-10-28T13:45:00Z",
+      "currency": "CAD",
+      "master_indicator_id": "CA_BOC_RATE",
+      "rank": "S",
+      "display_name_ja": "BOC政策金利",
+      "date_jst": "2026-10-28T22:45:00+09:00",
+      "record_ids": [
+        "OFFICIAL_SCHEDULE:CA:CA_BOC_RATE:2026-10-28"
+      ]
+    }
+  ],
+  "review_record_ids": [],
+  "counts": {
+    "fetched": 3,
+    "matched_S": 3,
+    "matched_A": 0,
+    "review": 0,
+    "display_groups": 3
+  }
+}
