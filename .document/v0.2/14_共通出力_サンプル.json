@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "report_date_jst": "2099-01-01",
+  "generated_at_utc": "2099-01-01T00:00:00Z",
+  "master_policy_version": "2026-10-15.1",
+  "sample_only": true,
+  "acquisition": {
+    "provider": "SYNTHETIC_TEST_ONLY",
+    "license_status": "MOCK",
+    "fetch_status": "MOCK",
+    "coverage_status": "MOCK",
+    "range_start_utc": "2098-12-31T15:00:00Z",
+    "range_end_utc_exclusive": "2099-01-01T15:00:00Z",
+    "requested_countries": [
+      "AU",
+      "GB",
+      "US"
+    ]
+  },
+  "events": [
+    {
+      "record_id": "MOCK:001",
+      "source_record_id": "001",
+      "country": "AU",
+      "currency": "AUD",
+      "title_raw": "Employment Change",
+      "date_utc": "2099-01-01T00:30:00Z",
+      "date_jst": "2099-01-01T09:30:00+09:00",
+      "time_precision": "EXACT",
+      "provider_importance": {
+        "scheme": "MOCK",
+        "value": 0
+      },
+      "master_indicator_id": "AU_EMPLOYMENT",
+      "rank": "S",
+      "match_status": "MATCHED",
+      "release_status": "SCHEDULED",
+      "values": {
+        "previous": null,
+        "forecast": null,
+        "actual": null,
+        "revised_previous": null,
+        "unit": null,
+        "scale": null
+      },
+      "first_party": {
+        "organization": null,
+        "url": null,
+        "verified": false
+      }
+    },
+    {
+      "record_id": "MOCK:002",
+      "source_record_id": "002",
+      "country": "GB",
+      "currency": "GBP",
+      "title_raw": "GDP MoM",
+      "date_utc": "2099-01-01T06:00:00Z",
+      "date_jst": "2099-01-01T15:00:00+09:00",
+      "time_precision": "EXACT",
+      "provider_importance": {
+        "scheme": "MOCK",
+        "value": 0
+      },
+      "master_indicator_id": "GB_GDP",
+      "rank": "A",
+      "match_status": "MATCHED",
+      "release_status": "SCHEDULED",
+      "values": {
+        "previous": null,
+        "forecast": null,
+        "actual": null,
+        "revised_previous": null,
+        "unit": null,
+        "scale": null
+      },
+      "first_party": {
+        "organization": null,
+        "url": null,
+        "verified": false
+      }
+    },
+    {
+      "record_id": "MOCK:003",
+      "source_record_id": "003",
+      "country": "US",
+      "currency": "USD",
+      "title_raw": "Unknown Economic Event",
+      "date_utc": "2099-01-01T12:30:00Z",
+      "date_jst": "2099-01-01T21:30:00+09:00",
+      "time_precision": "EXACT",
+      "provider_importance": {
+        "scheme": "MOCK",
+        "value": 0
+      },
+      "master_indicator_id": null,
+      "rank": null,
+      "match_status": "REVIEW",
+      "release_status": "SCHEDULED",
+      "values": {
+        "previous": null,
+        "forecast": null,
+        "actual": null,
+        "revised_previous": null,
+        "unit": null,
+        "scale": null
+      },
+      "first_party": {
+        "organization": null,
+        "url": null,
+        "verified": false
+      }
+    }
+  ],
+  "display_groups": [
+    {
+      "group_key": "AUD|AU_EMPLOYMENT|2099-01-01T00:30:00Z",
+      "currency": "AUD",
+      "master_indicator_id": "AU_EMPLOYMENT",
+      "rank": "S",
+      "display_name_ja": "豪雇用統計",
+      "date_jst": "2099-01-01T09:30:00+09:00",
+      "record_ids": [
+        "MOCK:001"
+      ]
+    },
+    {
+      "group_key": "GBP|GB_GDP|2099-01-01T06:00:00Z",
+      "currency": "GBP",
+      "master_indicator_id": "GB_GDP",
+      "rank": "A",
+      "display_name_ja": "英国GDP",
+      "date_jst": "2099-01-01T15:00:00+09:00",
+      "record_ids": [
+        "MOCK:002"
+      ]
+    }
+  ],
+  "review_record_ids": [
+    "MOCK:003"
+  ],
+  "counts": {
+    "fetched": 3,
+    "matched_S": 1,
+    "matched_A": 1,
+    "review": 1,
+    "display_groups": 2
+  }
+}
