@@ -1,0 +1,32 @@
+# ECO-014: 公式日程の検証用クロスウォーク（固定重要度YAMLの変更ではない）
+schema_version: 1
+mapping_version: "2026-10-15.1"
+master_policy_version: "2026-10-15.1"
+mode: "verified_event_example_only"
+status: "not_a_production_general_matcher"
+match_policy: "country_currency_source_url_date_and_exact_title"
+records:
+  - country: AU
+    currency: AUD
+    date_local: "2026-10-28"
+    source_name: "Australian Bureau of Statistics"
+    source_url: "https://www.abs.gov.au/release-calendar/future-releases/202610/rcc_economy"
+    original_title: "Consumer Price Index, Australia"
+    master_indicator_id: AU_CPI
+    expected_priority: S
+  - country: NZ
+    currency: NZD
+    date_local: "2026-10-28"
+    source_name: "Reserve Bank of New Zealand"
+    source_url: "https://www.rbnz.govt.nz/news-and-events/events/2026/october/monetary-policy-review-and-ocr-october-2026"
+    original_title: "Monetary Policy Review and OCR October 2026"
+    master_indicator_id: NZ_RBNZ_RATE
+    expected_priority: S
+  - country: CA
+    currency: CAD
+    date_local: "2026-10-28"
+    source_name: "Bank of Canada"
+    source_url: "https://www.bankofcanada.ca/2026/07/bank-canada-publishes-2027-schedule-policy-interest-rate-announcements-other-major-publications/"
+    original_title: "Policy interest rate announcements"
+    master_indicator_id: CA_BOC_RATE
+    expected_priority: S
