@@ -41,3 +41,11 @@
 ## 現時点の経済指標機能
 
 追加取得費用0円、公式無料情報の複数統合、共通JSONとYAMLのS/A判定仕様は`develop`内の`.document/v0.2/`を正本とする。`release_0.1.0`へ含めない。
+
+## 2026-10-15 実施確認
+
+- `release_0.1.0` は `main` の SHA `4c65d32bb8d4fa1ba6bcf69451bffd390f0ec858` と同一の参照として作成済み。**リリースブランチへのコミットは行っていない**。
+- 現在の維持ブランチは `main` / `develop` / `release_0.1.0` の3本。
+- 未統合だった旧 `research/tradingview-mcp-authorization-20261010` は、SHA `f5ed122c74b60948d90d6ccb1ab8afde2617b2c6` をタグ `archive/tradingview-mcp-research-20261010` に保全し、ドラフトPR #2をクローズしてから削除した。調査コミットは`develop`や`main`へ取り込んでいない。
+- 一時作業ブランチもGitHub Actionsで削除済み。
+- **GitHubルールセットはまだ未作成**。運用規約ではリリースの直接更新禁止だが、GitHub側の技術的な書込禁止はリポジトリ管理者による設定が必要。誤って「保護設定済み」と扱わない。
