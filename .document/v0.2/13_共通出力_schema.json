@@ -11,7 +11,8 @@
     "events",
     "display_groups",
     "review_record_ids",
-    "counts"
+    "counts",
+    "sample_only"
   ],
   "properties": {
     "schema_version": {
@@ -37,7 +38,10 @@
         "coverage_status",
         "license_status",
         "range_start_utc",
-        "range_end_utc_exclusive"
+        "range_end_utc_exclusive",
+        "requested_countries",
+        "reported_countries",
+        "fetched_at_utc"
       ],
       "properties": {
         "provider": {
@@ -73,8 +77,36 @@
         "range_end_utc_exclusive": {
           "type": "string",
           "format": "date-time"
+        },
+        "requested_countries": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$"
+          },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "reported_countries": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$"
+          },
+          "uniqueItems": true
+        },
+        "fetched_at_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "error_code": {
+          "type": [
+            "string",
+            "null"
+          ]
         }
-      }
+      },
+      "additionalProperties": false
     },
     "events": {
       "type": "array",
@@ -125,7 +157,12 @@
           "type": "integer",
           "minimum": 0
         }
-      }
+      },
+      "additionalProperties": false
+    },
+    "sample_only": {
+      "type": "boolean",
+      "description": "Synthetic examples are true; actual acquired data must be false."
     }
   },
   "$defs": {
@@ -150,13 +187,16 @@
       ],
       "properties": {
         "record_id": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
         "source_record_id": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
         "country": {
-          "type": "string"
+          "type": "string",
+          "pattern": "^[A-Z]{2}$"
         },
         "currency": {
           "enum": [
@@ -170,7 +210,8 @@
           ]
         },
         "title_raw": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
         "date_utc": {
           "type": [
@@ -194,7 +235,25 @@
           ]
         },
         "provider_importance": {
-          "type": "object"
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "scheme",
+            "value"
+          ],
+          "properties": {
+            "scheme": {
+              "type": "string",
+              "minLength": 1
+            },
+            "value": {
+              "type": [
+                "number",
+                "string",
+                "null"
+              ]
+            }
+          }
         },
         "master_indicator_id": {
           "type": [
@@ -221,11 +280,13 @@
             "SCHEDULED",
             "RELEASED_VERIFIED",
             "UNVERIFIED_EARLY_ACTUAL",
-            "TIME_UNKNOWN"
+            "TIME_UNKNOWN",
+            "RELEASED_UNVERIFIED"
           ]
         },
         "values": {
           "type": "object",
+          "additionalProperties": false,
           "required": [
             "previous",
             "forecast",
@@ -233,17 +294,74 @@
             "revised_previous",
             "unit",
             "scale"
-          ]
+          ],
+          "properties": {
+            "previous": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "forecast": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "actual": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "revised_previous": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "unit": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "scale": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
         },
         "first_party": {
           "type": "object",
+          "additionalProperties": false,
           "required": [
             "organization",
             "url",
             "verified"
-          ]
+          ],
+          "properties": {
+            "organization": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "url": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "verified": {
+              "type": "boolean"
+            }
+          }
         }
-      }
+      },
+      "additionalProperties": false
     },
     "group": {
       "type": "object",
@@ -261,7 +379,15 @@
           "type": "string"
         },
         "currency": {
-          "type": "string"
+          "enum": [
+            "USD",
+            "JPY",
+            "EUR",
+            "GBP",
+            "AUD",
+            "NZD",
+            "CAD"
+          ]
         },
         "master_indicator_id": {
           "type": "string"
@@ -285,11 +411,15 @@
         "record_ids": {
           "type": "array",
           "items": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
+          "uniqueItems": true,
           "minItems": 1
         }
-      }
+      },
+      "additionalProperties": false
     }
-  }
+  },
+  "additionalProperties": false
 }
