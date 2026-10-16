@@ -86,3 +86,10 @@ main / develop / release_0.1.0のみ維持し、例外的な検証ブランチ�
 - [BOJ/BoE/ECB/FOMC試験 Run #38857096016](https://github.com/yuki746289/product_chat_record/actions/runs/38857096016)：5候補中4件のS級JSON照合PASS（内訳は時刻未定/会合日付のみの例を含む）。ONS CPIの自動抽出は未達。
 - [53グループカバレッジ台帳](../.document/v0.2/23_重要指標53件_無料取得カバレッジ台帳_20261016.md)：**限定実証7グループ/53**、残り46グループは機械取得未検証。NZDは6グループ全て未実証。
 - **全53グループの恒常無料自動取得を達成したわけではない**。REL-020-01〜08のリリース完了判定は変更しない。
+
+## 2026-10-16 ONS/Destatis実証（ECO-019）
+- [詳細報告](../.document/v0.2/24_無料公式カレンダーONS_Destatis_取得監査_20261016.md) に10候補のHTTP/JSON成否、ONS4系列のイベント日時変換、Destatis CPI日付のUNKNOWN保持を記録。
+- [ONS公式API検証 #38866589454](https://github.com/yuki746289/product_chat_record/actions/runs/38866589454): GB_CPI (S)、GB_EMPLOYMENT (A)、GB_RETAIL (A)、GB_GDP (A) の4系列すべて共通JSON Schema PASS。
+- [Destatis検証 #38866830724](https://github.com/yuki746289/product_chat_record/actions/runs/38866830724): DE_CPI (A) の日付のみのJSON Schema PASS。Eurostat ICSとNZDの自動日程取得は未達。
+- [53グループ台帳](../.document/v0.2/23_重要指標53件_無料取得カバレッジ台帳_20261016.md): **限定実証12/53・未実証41/53**。本番での完全取得が保証されたわけではない。
+- ソースごとの利用許諾、実機アプリ統合・既存チャート回帰が完了していないため、REL-020-01〜08のリリース判定は変更しない。
