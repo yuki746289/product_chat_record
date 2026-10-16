@@ -71,3 +71,11 @@ main / develop / release_0.1.0のみ維持し、例外的な検証ブランチ�
 - REL-020-04: **限定PASS**（2イベントに対する実HTTP・JST・既存JSON Schema）。全7通貨・全指標の実データ取得、日界/再試行全網羅は未完了。
 - REL-020-01〜03、05〜08: **NG継続**。仕様確認は不合格のままで、リリース許可ではない。
 - リリースブランチは増やさない。`release_0.1.0`は書き換えず、`release_0.2.0`は全受入条件完了後のdevelopから作成する。
+
+## 2026-10-16 公式無料カレンダー追加試験（ECO-017）
+- [監査報告](../.document/v0.2/22_無料公式カレンダー追加取得監査_20261016.md)に11公式URLのHTTP結果（9件200、RBNZ403、DE404）、カナダ統計局JSON全2,881件の解析、S級候補4件の日時精度付きJSON検証を記録。
+- [Run #38856748747](https://github.com/yuki746289/product_chat_record/actions/runs/38856748747): 11 URLの応答形式確認。
+- [Run #38856912117](https://github.com/yuki746289/product_chat_record/actions/runs/38856912117): StatCan JSONで今後の25日程、CPI等10件を検出。時刻未定をUNKNOWNにしてS級JSONをSchema検証。
+- [Run #38857096016](https://github.com/yuki746289/product_chat_record/actions/runs/38857096016): BOJ/BoE/ECB/FOMCの4件を独自Sマスターへ照合しSchema検証。ONS CPIは今回の抽出条件では失敗。
+- 7通貨中6通貨で各1件以上の限定的な公式情報→JSON変換が確認できた（うち会合日程と発表時刻を分離して検証すべき例あり）。NZDは依然未達。
+- 本件は**取得元候補の調査結果**であり、7通貨53グループ全件網羅、権利確認、本体実装、PNG作成の合格ではない。REL-020-01/02/03/05/06/07/08はNGを維持。
