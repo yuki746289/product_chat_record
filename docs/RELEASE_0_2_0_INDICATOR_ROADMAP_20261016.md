@@ -63,3 +63,11 @@ main / develop / release_0.1.0のみ維持し、例外的な検証ブランチ�
 - 無料取得元のHTTPレスポンス実検証 → ソース固有アダプター設計 → 別名照合品質監査。
 - 項目・UI・取得失敗時動作の未確定事項を解消し、仕様確認を更新。
 - appルールとコーディング規約に沿って実装・テスト。成功済み処理をむやみに再実行しない。
+
+## 2026-10-16 無料公式データ取得・JSON正規化検証の進捗
+- [取得・エラーの全6件監査](../.document/v0.2/20_無料公式HTTP取得監査_20261016.md) : GitHub Actions Run #38850832684。ABS/BoC/Eurostat HTMLはHTTP200、BLS ICSとHTMLは403、カナダ統計局JSONはtimeout。
+- [HTML本文から実際の予定抽出](https://github.com/yuki746289/product_chat_record/actions/runs/38851008943) : ABSのCPIとBoCの10月28日政策金利の日付・時刻をHTTPから確認。Eurostatは個別予定の取得未達。
+- [2機関の共通JSONまでの実証](../.document/v0.2/21_無料公式取得JSON正規化実証_20261016.md) : GitHub Actions Run #38851280954、SUCCESS。実HTTPから取得し、JST変換、重要度マスターS級照合、jsonschemaの型・日時と参照を検証。取得範囲は2件のみ、INCOMPLETE明示。
+- REL-020-04: **限定PASS**（2イベントに対する実HTTP・JST・既存JSON Schema）。全7通貨・全指標の実データ取得、日界/再試行全網羅は未完了。
+- REL-020-01〜03、05〜08: **NG継続**。仕様確認は不合格のままで、リリース許可ではない。
+- リリースブランチは増やさない。`release_0.1.0`は書き換えず、`release_0.2.0`は全受入条件完了後のdevelopから作成する。
