@@ -73,3 +73,9 @@ DB・テーブルは初版で必須としない。マスターのファイル形
 - 共通JSON化した3件は `18_公式日程_正規化例_20261028.json`。8地域中3地域の部分取得につき `fetch_status=PARTIAL`、`coverage_status=INCOMPLETE`、`license_status=PENDING`。
 - 各国日程とタイムゾーンの確認事項は `19_無料公式カレンダー実地検証_20261015.md`。
 - 一次情報の予定確認と、HTTP自動収集の許諾・網羅性・実績値自動照合は別工程とする。
+
+## ECO-019 ONS公開Release Search API・Destatisの限定的な実証
+- ONS公式API `https://api.beta.ons.gov.uk/v1/search/releases`の応答は`releases[]`配列であり、原タイトル`description.title`とUTC指定を含む`description.release_date`、`uri`を確認。未来のCPI/雇用/GDP/小売を提供元固有のタイトルで照合し、S/AとSchema検証PASS（各1件）。
+- 「time series」等の派生リリースは統計指標の二重カウントを起こし得るため、元タイトルとURIに基づく重複排除を後続設計で検証する。検索結果の件数は発表イベントの件数ではない。
+- Destatis公式週間予定のCPI確報は、元イベントの日付を確認できたが正確な発表時刻は未検証。共通JSONはUNKNOWNを維持する。
+- `24_無料公式カレンダーONS_Destatis_取得監査_20261016.md`参照。無料であることと、持続的な自動収集/出典表示/画像化の適用条件の最終判定は分けて管理する。
