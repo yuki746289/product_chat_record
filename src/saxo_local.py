@@ -128,7 +128,7 @@ def tick_once(config_path, now=None, provider=None, clock=None):
             _save_last_success(root,slot)
         return generated
     finally:
-        clean_local_images(root,now,maximum,cfg['output']['timezone'])
+        clean_local_images(root,now,maximum,cfg['output']['timezone'],cfg['output']['folder_format'])
 
 
 def main():
