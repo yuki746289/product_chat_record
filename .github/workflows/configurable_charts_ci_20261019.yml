@@ -8,6 +8,9 @@ on:
       - .github/workflows/configurable_charts_ci_20261019.yml
       - tests/test_configurable_chart_20261019.py
   workflow_dispatch:
+concurrency:
+  group: chart-config-qa-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
