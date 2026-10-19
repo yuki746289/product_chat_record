@@ -8,7 +8,7 @@ import logging
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from .config import load_settings, EXPECTED_TIMEFRAMES
+from .config import load_settings
 from .chart import render_pair
 from .local_monitor import clean_local_images, get_monitor_options
 from .main import is_fresh_minute_candle
@@ -88,17 +88,19 @@ def tick_once(config_path, now=None, provider=None, clock=None):
             pair=item['pair']
             try:
                 frames={}
-                one=source.get(pair,'1M',cfg['chart']['history_bars'])
-                # Chart generation is sequential. Pair 10 may be fetched minutes
-                # after the first pair, so do not use the snapshot start time here.
-                freshness_now=now if fixed_now else clock()
-                if not is_fresh_minute_candle(one,freshness_now,cfg['market']['max_1m_age_minutes']):
-                    latest=one.index.max().isoformat() if not one.empty else 'none'
-                    skipped_stale.append(f'{pair}: latest_1m={latest}, checked_at={freshness_now.isoformat()}')
-                    continue
-                frames['1M']=one
-                for tf in EXPECTED_TIMEFRAMES:
-                    if tf!='1M':
+                # A one-minute bar is used for market freshness independently
+                # of whether a 1M panel is selected by the user.
+                if cfg['market']['skip_stale']:
+                    one=source.get(pair,'1M',cfg['chart']['history_bars'])
+                    freshness_now=now if fixed_now else clock()
+                    if not is_fresh_minute_candle(one,freshness_now,cfg['market']['max_1m_age_minutes']):
+                        latest=one.index.max().isoformat() if not one.empty else 'none'
+                        skipped_stale.append(f'{pair}: latest_1m={latest}, checked_at={freshness_now.isoformat()}')
+                        continue
+                    if '1M' in cfg['chart']['timeframes']:
+                        frames['1M']=one
+                for tf in cfg['chart']['timeframes']:
+                    if tf not in frames:
                         frames[tf]=source.get(pair,tf,cfg['chart']['history_bars'])
                     if len(frames[tf])<cfg['chart']['bars']:
                         raise ValueError(f'{pair} {tf}: insufficient candles')
