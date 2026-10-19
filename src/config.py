@@ -2,6 +2,7 @@
 # Updated: 2026-10-14 JST (resolve relative image directory beside setting.yaml)
 """Load validated chart settings."""
 from pathlib import Path, PureWindowsPath
+from zoneinfo import ZoneInfo
 import re
 import yaml
 
@@ -36,15 +37,47 @@ def load_settings(path):
             raise ValueError(f'duplicate currency pair: {item["pair"]}')
         seen.add(item['pair'])
     chart = cfg.get('chart', {})
-    if tuple(chart.get('timeframes', [])) != EXPECTED_TIMEFRAMES:
-        raise ValueError('chart.timeframes must be the nine ordered specified timeframes')
-    if chart.get('columns') != 2:
-        raise ValueError('chart.columns must be 2')
-    for key, vals in (('ema', [20, 30, 40]), ('rci', [9, 14, 26])):
-        if chart.get(key) != vals:
-            raise ValueError(f'chart.{key} must be {vals}')
-    if int(chart.get('bars', 0)) < 42 or int(chart.get('history_bars', 0)) < 100:
-        raise ValueError('insufficient chart/history bars')
+    if not isinstance(chart, dict):
+        raise ValueError('chart must be a mapping')
+    frames = chart.get('timeframes')
+    if not isinstance(frames, list) or not frames or any(
+            not isinstance(tf, str) or tf not in EXPECTED_TIMEFRAMES for tf in frames):
+        raise ValueError(f'chart.timeframes must be a non-empty list of {EXPECTED_TIMEFRAMES}')
+    if len(frames) != len(set(frames)):
+        raise ValueError('chart.timeframes must not contain duplicates')
+    columns = chart.get('columns')
+    if isinstance(columns, bool) or not isinstance(columns, int) or not 1 <= columns <= 20:
+        raise ValueError('chart.columns must be an integer from 1 to 20')
+    for key, lower in (('ema', 1), ('rci', 2)):
+        periods = chart.get(key)
+        if not isinstance(periods, list) or not periods or any(
+                isinstance(n, bool) or not isinstance(n, int) or n < lower for n in periods):
+            raise ValueError(f'chart.{key} must be a non-empty list of integer periods >= {lower}')
+        if len(periods) != len(set(periods)):
+            raise ValueError(f'chart.{key} must not contain duplicates')
+    bars = chart.get('bars')
+    history = chart.get('history_bars')
+    if (isinstance(bars, bool) or not isinstance(bars, int) or bars < 42
+            or isinstance(history, bool) or not isinstance(history, int)
+            or not max(100, bars, *chart['ema'], *chart['rci']) <= history <= 1200):
+        raise ValueError('chart.bars must be >= 42 and chart.history_bars must be 100..1200 and >= all indicator periods and bars')
+    dpi = chart.get('dpi')
+    if isinstance(dpi, bool) or not isinstance(dpi, int) or not 40 <= dpi <= 600:
+        raise ValueError('chart.dpi must be an integer from 40 to 600')
+    size = chart.get('figsize')
+    if (not isinstance(size, list) or len(size) != 2 or any(
+            isinstance(n, bool) or not isinstance(n, (int, float)) or not 1 <= n <= 100 for n in size)):
+        raise ValueError('chart.figsize must be [width, height], each between 1 and 100 inches')
+    padding = chart.get('right_padding_bars', 12)
+    if isinstance(padding, bool) or not isinstance(padding, int) or not 0 <= padding <= 1000:
+        raise ValueError('chart.right_padding_bars must be an integer from 0 to 1000')
+    if chart.get('theme', 'dark') not in ('dark', 'light'):
+        raise ValueError('chart.theme must be dark or light')
+    for section, name in ((chart, 'chart'), (cfg.get('output', {}), 'output')):
+        try:
+            ZoneInfo(section['timezone'])
+        except (KeyError, TypeError, ValueError, OSError) as exc:
+            raise ValueError(f'{name}.timezone must be a valid IANA timezone') from exc
     market = cfg.setdefault('market', {})
     market.setdefault('skip_stale', True)
     market.setdefault('max_1m_age_minutes', 10)
@@ -54,6 +87,7 @@ def load_settings(path):
             or not isinstance(market['max_1m_age_minutes'], int)
             or not 1 <= market['max_1m_age_minutes'] <= 30):
         raise ValueError('market.max_1m_age_minutes must be an integer from 1 to 30')
-    if cfg.get('provider', {}).get('type') != 'tradingview_mcp':
-        raise ValueError('provider.type must be tradingview_mcp; demo uses --demo')
+    if cfg.get('local_monitor', {}).get('mode', 'github') == 'github':
+        if cfg.get('provider', {}).get('type') != 'tradingview_mcp':
+            raise ValueError('provider.type must be tradingview_mcp in github mode')
     return cfg
