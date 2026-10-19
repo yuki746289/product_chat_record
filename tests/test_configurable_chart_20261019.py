@@ -55,7 +55,17 @@ def test_user_defined_timeframes_periods_columns_and_theme(tmp_path):
     assert result.stat().st_size > 1000
 
 
-def test_one_timeframe_and_single_column(tmp_path):
+def test_one_timeframe_and_single_column(tmp_path, monkeypatch):
+    from matplotlib.axes import Axes
+
+    recorded = []
+    original_text = Axes.text
+
+    def capture_text(self, x, y, text, *args, **kwargs):
+        recorded.append(str(text))
+        return original_text(self, x, y, text, *args, **kwargs)
+
+    monkeypatch.setattr(Axes, "text", capture_text)
     path = _settings(
         tmp_path, timeframes=["1H"], ema=[20], rci=[9],
         columns=1, bars=45, history_bars=100, figsize=[7, 8], dpi=40,
@@ -65,6 +75,8 @@ def test_one_timeframe_and_single_column(tmp_path):
     assert render_pair(
         bars, "USDJPY", tmp_path / "single.png", cfg, "20261019_1200", demo=True
     ).is_file()
+    assert any("TIMEFRAMES       1" in text for text in recorded)
+    assert not any("8H BAR" in text for text in recorded)
 
 
 @pytest.mark.parametrize(
