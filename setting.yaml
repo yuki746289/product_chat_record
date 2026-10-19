@@ -1,17 +1,17 @@
 # Created: 2026-10-10 JST
-# Updated: 2026-10-19 JST — 各設定値の許容値・固定値・注意点をコメントに明記
+# Updated: 2026-10-19 JST — 設定可変化に伴い各項目の許容値を更新
 # 通貨ペア・表示・保存・Saxo認証の公開設定。機密情報は記載しない。値そのものは変更していない。
 repository: yuki746289/product_chat_record  # owner/repo形式（例: yuki746289/product_chat_record）。旧GitHub Artifact取得用
 
 provider:
-  type    : tradingview_mcp  # 現行は tradingview_mcp のみ（Saxo接続方式は local_monitor.mode で指定）
+  type    : tradingview_mcp  # githubモードでは tradingview_mcp。Saxoモードでは旧設定値として保持
   url     : https://mcp.tradingview.com/mcp  # HTTPS URL（旧TradingView MCP接続先。Saxoモードでは未使用）
   enabled : false  # true / false（旧TradingView MCP画像生成の有効/無効。Saxoとは独立）
 
 symbols:
   # 1件以上の配列。pairは英大文字・数字・_・-の3〜32文字、重複不可（Saxoでは利用可能なFxSpot銘柄を指定）
   # categoryは先頭英小文字＋英小文字/数字/_（計1〜40文字）、tradingviewは「市場:銘柄」形式
-  # tradingviewの各側は英数字・_・.・-。Saxoモードでも現行はtradingview項目が必須
+  # tradingviewの各側は英数字・_・.・-。SaxoモードでもSaxoモードではtradingview省略可能。githubモードでは必須
   # pair=保存ファイル名/Saxo銘柄、category=保存先区分、tradingview=旧MCP互換の銘柄識別子
   # クロス円以外（7通貨ペア）
   - {pair: GBPAUD, category: cross_non_jpy, tradingview: FX:GBPAUD}
@@ -31,26 +31,26 @@ symbols:
   - {pair: NZDJPY, category: cross_jpy, tradingview: FX:NZDJPY}
 
 market:
-  skip_stale         : true  # true / false（旧モードで有効。Saxoローカルは現行常に鮮度を確認）
+  skip_stale         : true  # true / false（Saxo/旧モードとも有効。falseで休場・古い足のチェックを省略）
   max_1m_age_minutes : 10  # 1〜30の整数（分）。1分足の最新データを許容する経過時間
 
 chart:
-  timeframes         : [1M, 5M, 15M, 1H, 4H, 8H, 1D, 1W, 1Mn]  # 現行固定: [1M, 5M, 15M, 1H, 4H, 8H, 1D, 1W, 1Mn]（9件・順番変更不可。任意化は未実装）
-  ema                : [20, 30, 40]  # 現行固定: [20, 30, 40]（期間の任意指定は未実装）
-  rci                : [9, 14, 26]  # 現行固定: [9, 14, 26]（期間の任意指定は未実装）
-  columns            : 2  # 現行は 2 のみ（描画レイアウトは5行×2列固定）
-  bars               : 110  # 42以上の整数（表示本数）。history_bars以下を推奨
-  history_bars       : 220  # 100〜1200の整数を推奨（Saxo取得上限1200本、bars以上が必要）
-  right_padding_bars : 12  # 0以上の整数を推奨（チャート右余白。負数は現行コードで0に補正）
-  dpi                : 110  # 正の整数を指定（PNG解像度。現行は値の範囲を事前検証しない）
-  figsize            : [19, 25]  # [正の幅, 正の高さ] の数値2個（インチ）。レイアウトは現行固定
-  timezone           : Asia/Tokyo  # IANAタイムゾーン名（例: Asia/Tokyo, Etc/UTC）。画像のタイトルは現行JST固定
-  theme              : dark  # 現行の実効値は dark のみ（他の値を指定しても描画色に反映されない）
+  timeframes         : [1M, 5M, 15M, 1H, 4H, 8H, 1D, 1W, 1Mn]  # 対応値 1M,5M,15M,1H,4H,8H,1D,1W,1Mn の非空配列。重複不可、順序/個数は可変
+  ema                : [20, 30, 40]  # 1以上history_bars以下の整数の非空配列。重複不可、期間/本数は可変
+  rci                : [9, 14, 26]  # 2以上history_bars以下の整数の非空配列。重複不可、期間/本数は可変
+  columns            : 2  # 1〜20の整数（時間足数から行数を自動計算）
+  bars               : 110  # 42以上history_bars以下の整数（各時間足の表示本数）
+  history_bars       : 220  # 100〜1200の整数、bars・EMA・RCIの最大期間以上（Saxo取得上限）
+  right_padding_bars : 12  # 0〜1000の整数（チャート右余白。負数は不正設定）
+  dpi                : 110  # 40〜600の整数（PNG画像のDPI）
+  figsize            : [19, 25]  # [幅, 高さ] 各1〜100の数値2個（インチ、列数・行数に応じて調整）
+  timezone           : Asia/Tokyo  # IANAタイムゾーン名（例: Asia/Tokyo, Etc/UTC）。X軸の時刻に使用
+  theme              : dark  # dark / light（チャートの配色に反映）
 
 output:
   staging_dir   : output  # 任意の保存ディレクトリパス（旧GitHub画像生成モード用）
   timezone      : Asia/Tokyo  # IANAタイムゾーン名（例: Asia/Tokyo）。日時フォルダ作成時の基準
-  folder_format : '%Y%m%d_%H%M'  # 実質固定: '%Y%m%d_%H%M'（変更すると既存のフォルダ保持・削除処理が対応できない）
+  folder_format : '%Y%m%d_%H%M'  # %Y,%m,%d,%H,%Mを各1回含む文字列（英数字/._-区切り）。例: '%Y%m%d_%H%M'
   local_dir     : 'C:/TradingViewCharts'  # 絶対パス／setting.yaml基準の相対パス（再インストール時はinstall.image_folderへ再設定）
   artifact_name : charts  # 文字列（旧GitHub Artifact取得モードの成果物名）
 
