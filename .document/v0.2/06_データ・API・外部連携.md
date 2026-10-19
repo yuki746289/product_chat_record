@@ -86,3 +86,9 @@ DB・テーブルは初版で必須としない。マスターのファイル形
 - 検証Run #39204290773 は6件HTTP200・日付時刻原文隣接確認・America/Chicagoの夏時間変換・JsonSchema検証PASS。実績・予想値、正式API鍵、保存・画像化権、一次公表元との日時一致は未確認。
 - FREDの利用条件は第三者データの権利・クレジット表記・用途を区別する。条件が満たせない場合は本番の補助取得元にも採用しない。
 - 公式Web掲載時刻の精度と、本来の発表機関による正式公表時刻の検証状態を混同しない。
+
+## ECO-021 米国の一次公表予定・BEA ICS対応（2026-10-19）
+- FREDの米6系列はBLS/BEA/Census Bureauが掲載する一次予定日時との整合性を監査する。FREDは**二次取得先**であり一次公表機関ではない。
+- BEA公式ICS `https://www.bea.gov/news/schedule/ics/online-calendar-subscription.ics` はHTTP200でVEVENT 166件を取得、2026-10-29のGDP/PCE2件はUIDとUTC時刻を持つ。固定S/A（US_GDP=A、US_PCE=S）と共通JSON Schemaへ変換PASS（Run #39227699077）。
+- BLS3系列の予定日時はWebで一次日程と照合済み、ただしGitHub ActionsからのBLS HTTP403は継続。Censusの小売日時もWeb上では一致するが、本試験のHTMLから日時を抽出できていない。
+- 米国各源の実績/市場予想値・許諾条件の確認は未完了。欠測値はnull、取得不完全時はINCOMPLETEを維持。詳細は`27_米国6指標_一次情報日時照合_20261019.md`。
