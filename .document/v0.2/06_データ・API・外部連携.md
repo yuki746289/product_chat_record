@@ -92,3 +92,11 @@ DB・テーブルは初版で必須としない。マスターのファイル形
 - BEA公式ICS `https://www.bea.gov/news/schedule/ics/online-calendar-subscription.ics` はHTTP200でVEVENT 166件を取得、2026-10-29のGDP/PCE2件はUIDとUTC時刻を持つ。固定S/A（US_GDP=A、US_PCE=S）と共通JSON Schemaへ変換PASS（Run #39227699077）。
 - BLS3系列の予定日時はWebで一次日程と照合済み、ただしGitHub ActionsからのBLS HTTP403は継続。Censusの小売日時もWeb上では一致するが、本試験のHTMLから日時を抽出できていない。
 - 米国各源の実績/市場予想値・許諾条件の確認は未完了。欠測値はnull、取得不完全時はINCOMPLETEを維持。詳細は`27_米国6指標_一次情報日時照合_20261019.md`。
+
+## ECO-022 Stats NZ公式iCalendarのデータ取得（2026-10-19）
+- 発表元: Stats NZ。公開ICS実URL: `https://www.stats.govt.nz/release-calendar/calendar-export/`。当該サイトの一般公開JavaScriptに記述された公式リンクであり、非公開APIや推測URLではない。
+- GitHub Actions Run #39250285686 でHTTP200/`text/calendar`を取得、VEVENT 140件を解析。Run #39250626014 ではNZ CPI（S）、雇用統計（S）、小売（A）、GDP（A）の4系列を元ICS UID/DTSTARTからJSTへ変換し、共通JSON Schema PASS。
+- 既存YAMLの判定値を変更せず、原題（Summary）に対する4件限定クロスウォーク`28_StatsNZ_4指標_公式ICS照合.yaml`を追加した。Stats NZの`Employment indicators`と`Labour market statistics`は名称も定義も異なるため、全て同じ経済指標と推測して自動統合しない。
+- 取得時刻は`DTSTART`のタイムゾーンを使い`Asia/Tokyo`へ変換。2026年10月～12月の対象4件はいずれもJST 06:45。
+- Stats NZは一般的に自作コンテンツをCC BY 4.0で提供（https://www.stats.govt.nz/about-us/copyright/）。出典表示を必須とし、例外の第三者著作物・運用アクセス条件は後続で確認。`license_status=PENDING`を維持。
+- 対象8地域のうちNZだけを検査した部分例なので`coverage_status=INCOMPLETE`。`forecast`/`actual`/`previous`は取得していないため`null`。運用アプリは未実装。
