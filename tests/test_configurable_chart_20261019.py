@@ -146,3 +146,31 @@ def test_config_rejects_invalid_folder_formats(tmp_path):
     path.write_text(yaml.safe_dump(cfg), encoding="utf-8")
     with pytest.raises(ValueError, match="output.folder_format"):
         load_settings(path)
+
+
+def test_custom_folder_format_github_artifact_detection(tmp_path):
+    from src.local_monitor import _find_artifact_batch, PNG_HEADER
+
+    fmt = "%Y-%m-%d_%H-%M"
+    batch = tmp_path / "2026-10-19_10-00"
+    category = batch / "cross_jpy"
+    category.mkdir(parents=True)
+    path = category / "USDJPY.png"
+    path.write_bytes(PNG_HEADER)
+    discovered, files = _find_artifact_batch(tmp_path, ["USDJPY"], "Etc/UTC", fmt)
+    assert discovered == batch
+    assert files == [path]
+
+
+def test_demo_8h_without_displaying_4h(tmp_path):
+    from src.main import generate
+
+    path = _settings(tmp_path, timeframes=["8H"], columns=1, bars=42,
+                     history_bars=100, dpi=40, figsize=[7, 8])
+    cfg = yaml.safe_load(path.read_text(encoding="utf-8"))
+    cfg["symbols"] = cfg["symbols"][:1]
+    path.write_text(yaml.safe_dump(cfg), encoding="utf-8")
+    files = generate(path, timestamp="20261019_1000", demo=True,
+                     output_override=tmp_path / "output")
+    assert len(files) == 1
+    assert files[0].is_file()
