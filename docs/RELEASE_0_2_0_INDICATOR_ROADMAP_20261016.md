@@ -107,3 +107,10 @@ main / develop / release_0.1.0のみ維持し、例外的な検証ブランチ�
 - BEAの公式ICSは[Run #39227247707](https://github.com/yuki746289/product_chat_record/actions/runs/39227247707)で166イベントを取得、[Run #39227699077](https://github.com/yuki746289/product_chat_record/actions/runs/39227699077)でGDP/PCEを直接ICS→JST→S/A→共通JSON Schema検証2件PASS。
 - BLS3系列の一次予定はWeb照合のみ、Actions HTTP403は未解消。Census小売も一次Web照合のみ。継続API/ICS自動運用の利用許諾・本番監視は未達。
 - 53指標の限定実証数は**18/53のまま**で、根拠区分を精緻化した。リリース条件はNG継続。
+
+## 2026-10-19 Stats NZ公式ICS取得・4指標の共通JSON変換（ECO-022）
+- [公式ICSの発見・実取得 #39250285686](https://github.com/yuki746289/product_chat_record/actions/runs/39250285686)：Stats NZ一般公開JS内の`/release-calendar/calendar-export`を取得。140 VEVENT、UID・TZ付き発表日程を確認。
+- [4指標のSchema検証 #39250626014](https://github.com/yuki746289/product_chat_record/actions/runs/39250626014)：NZ_CPI、NZ_EMPLOYMENT、NZ_RETAIL、NZ_GDPを元ICSからJSTへ変換し、固定YAMLのS/Aと共通JSON Schemaを4/4 PASS。
+- [照合マスター](../.document/v0.2/28_StatsNZ_4指標_公式ICS照合.yaml) と [取得監査](../.document/v0.2/29_StatsNZ公式ICS_4指標取得実証_20261019.md) を追加。Stats NZ著作権案内はCC BY4.0原則と出典表示を求めるため、正式利用時には表示する。
+- [53指標の監査台帳](../.document/v0.2/23_重要指標53件_無料取得カバレッジ台帳_20261016.md)は**限定実証22/53、未実証31/53、NZD4/6**へ更新。
+- RBNZ政策金利・NZ企業景況感、Eurostat ICS、Windows実機/PNG実装は未達。新リリース作成の停止条件は維持。
