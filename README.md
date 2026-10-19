@@ -1,9 +1,11 @@
 <!-- Created: 2026-10-09 22:09 JST -->
 # TradingView-style Currency Chart Recorder
 
-Generate one dark-theme PNG per configured currency pair, consisting of **nine**
-chart panels in two columns (1M, 5M, 15M, 1H, 4H, 8H, 1D, 1W, 1Mn) and one
-information panel. EMA: 20, 30, 40. RCI: 9, 14, 26.
+Generate one configurable-theme PNG per currency pair. Select and order supported
+chart timeframes through `chart.timeframes`, choose `chart.columns` (rows are
+calculated automatically), and customize EMA/RCI period arrays. Default settings
+retain nine panels in two columns (1M, 5M, 15M, 1H, 4H, 8H, 1D, 1W, 1Mn)
+with EMA 20/30/40 and RCI 9/14/26, plus an information panel.
 
 ## Important status
 
