@@ -42,20 +42,18 @@ def get_monitor_options(cfg):
     return poll, maximum
 
 
-def parse_chart_stamp(name, time_zone):
-    if not STAMP.fullmatch(name):
-        return None
+def parse_chart_stamp(name, time_zone, folder_format="%Y%m%d_%H%M"):
     try:
-        local = datetime.strptime(name, "%Y%m%d_%H%M").replace(tzinfo=ZoneInfo(time_zone))
-        # Reject impossible/normalized wall-clock values, e.g. DST transitions.
-        if local.astimezone(timezone.utc).astimezone(ZoneInfo(time_zone)).strftime("%Y%m%d_%H%M") != name:
+        local = datetime.strptime(name, folder_format).replace(tzinfo=ZoneInfo(time_zone))
+        # Reject normalized/missing wall-clock values (including DST gaps).
+        if local.astimezone(timezone.utc).astimezone(ZoneInfo(time_zone)).strftime(folder_format) != name:
             return None
         return local
     except ValueError:
         return None
 
 
-def clean_local_images(local_dir, now, max_folders=10, time_zone="Asia/Tokyo"):
+def clean_local_images(local_dir, now, max_folders=10, time_zone="Asia/Tokyo", folder_format="%Y%m%d_%H%M"):
     """Retain at most the newest N timestamp folders containing PNGs.
 
     A snapshot folder has YYYYMMDD_HHmm and at least one direct/category PNG.
@@ -70,7 +68,7 @@ def clean_local_images(local_dir, now, max_folders=10, time_zone="Asia/Tokyo"):
     for entry in directory.iterdir():
         if not entry.is_dir() or entry.is_symlink():
             continue
-        local_dt = parse_chart_stamp(entry.name, time_zone)
+        local_dt = parse_chart_stamp(entry.name, time_zone, folder_format)
         # Both timestamp/*.png and timestamp/category/*.png count as snapshots.
         direct = any(entry.glob("*.png"))
         categorized = any(
@@ -191,7 +189,7 @@ def poll_once(config_path, now=None):
                 _gh("run", "download", run_id, "-R", repo, "-n", artifact_name,
                     "-D", temp)
                 batch, files = _find_artifact_batch(temp, pairs)
-                if parse_chart_stamp(batch.name, cfg["output"]["timezone"]) is None:
+                if parse_chart_stamp(batch.name, cfg["output"]["timezone"], cfg["output"]["folder_format"]) is None:
                     raise ValueError(f"Invalid timestamp folder: {batch.name}")
                 target = root / batch.name
                 target.mkdir(parents=True, exist_ok=True)
@@ -206,5 +204,5 @@ def poll_once(config_path, now=None):
                 _save_state(root, processed)
     finally:
         # Cleanup runs even with no new images or if GitHub is temporarily down.
-        clean_local_images(root, now, maximum, cfg["output"]["timezone"])
+        clean_local_images(root, now, maximum, cfg["output"]["timezone"], cfg["output"]["folder_format"])
     return downloaded
