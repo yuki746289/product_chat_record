@@ -93,3 +93,11 @@ main / develop / release_0.1.0のみ維持し、例外的な検証ブランチ�
 - [Destatis検証 #38866830724](https://github.com/yuki746289/product_chat_record/actions/runs/38866830724): DE_CPI (A) の日付のみのJSON Schema PASS。Eurostat ICSとNZDの自動日程取得は未達。
 - [53グループ台帳](../.document/v0.2/23_重要指標53件_無料取得カバレッジ台帳_20261016.md): **限定実証12/53・未実証41/53**。本番での完全取得が保証されたわけではない。
 - ソースごとの利用許諾、実機アプリ統合・既存チャート回帰が完了していないため、REL-020-01〜08のリリース判定は変更しない。
+
+## 2026-10-19 FRED6指標の代替無料取得検証
+- [公開カレンダーHTTP検証 #39204071618](https://github.com/yuki746289/product_chat_record/actions/runs/39204071618) — FREDの米雇用/CPI予定がGitHub ActionsからHTTP200で取得できることを確認。
+- [米6系列の共通JSON実証 #39204290773](https://github.com/yuki746289/product_chat_record/actions/runs/39204290773) — 雇用統計、CPI、PPI、PCE、GDP、小売売上高の予定日時が、公開FREDカレンダー→America/Chicago→UTC/JST→独自S/A→JSON Schemaで6/6 PASS。
+- [検証用FRED ID対応](../.document/v0.2/25_FRED_6指標_照合マスター_検証用.yaml)、[取得監査](../.document/v0.2/26_FRED6指標_無料公式カレンダー検証_20261019.md)。
+- [53指標台帳](../.document/v0.2/23_重要指標53件_無料取得カバレッジ台帳_20261016.md)：**限定実証18/53（従来12＋二次集約6）、未実証35/53**。
+- FREDは各統計の一次公表元ではなく、ソース間不一致時に一次機関を優先する。正式利用権と画像化の確認が済むまでは本番接続しない。
+- NZD公式ICS、Eurostat公式ICS、米BLS一次時刻の独立照合等はNG継続。REL-020-01〜08のリリース停止条件は変更しない。
