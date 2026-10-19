@@ -28,8 +28,9 @@ def load_settings(path):
     for item in symbols:
         if not isinstance(item, dict) or not re.fullmatch(r'[A-Z0-9_-]{3,32}', str(item.get('pair', ''))):
             raise ValueError(f'invalid currency pair entry: {item}')
-        if not re.fullmatch(r'[A-Za-z0-9_.-]+:[A-Za-z0-9_.-]+', str(item.get('tradingview', ''))):
-            raise ValueError(f'invalid TradingView symbol for {item["pair"]}')
+        if cfg.get('local_monitor', {}).get('mode', 'github') == 'github':
+            if not re.fullmatch(r'[A-Za-z0-9_.-]+:[A-Za-z0-9_.-]+', str(item.get('tradingview', ''))):
+                raise ValueError(f'invalid TradingView symbol for {item["pair"]}')
         category = item.get('category', 'uncategorized')
         if not isinstance(category, str) or not re.fullmatch(r'[a-z][a-z0-9_]{0,39}', category):
             raise ValueError(f'invalid category for {item["pair"]}')
@@ -87,6 +88,16 @@ def load_settings(path):
             or not isinstance(market['max_1m_age_minutes'], int)
             or not 1 <= market['max_1m_age_minutes'] <= 30):
         raise ValueError('market.max_1m_age_minutes must be an integer from 1 to 30')
+    # The folder name must contain a complete minute-resolution local timestamp
+    # and must not introduce path separators (especially on Windows).
+    fmt = cfg.get('output', {}).get('folder_format')
+    if not isinstance(fmt, str) or any(fmt.count(token) != 1 for token in ('%Y', '%m', '%d', '%H', '%M')):
+        raise ValueError('output.folder_format must contain %Y, %m, %d, %H and %M exactly once')
+    literals = fmt
+    for token in ('%Y', '%m', '%d', '%H', '%M'):
+        literals = literals.replace(token, '')
+    if '%' in literals or not re.fullmatch(r'[A-Za-z0-9_.-]*', literals):
+        raise ValueError('output.folder_format must use safe filename characters and date tokens only')
     if cfg.get('local_monitor', {}).get('mode', 'github') == 'github':
         if cfg.get('provider', {}).get('type') != 'tradingview_mcp':
             raise ValueError('provider.type must be tradingview_mcp in github mode')
