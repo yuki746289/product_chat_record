@@ -6,7 +6,7 @@ from pathlib import Path
 import pandas as pd
 from zoneinfo import ZoneInfo
 from .chart import render_pair
-from .config import load_settings, EXPECTED_TIMEFRAMES
+from .config import load_settings
 from .providers import DemoProvider, TradingViewMcpProvider, resample_8h
 
 
@@ -46,11 +46,13 @@ def generate(settings, timestamp=None, demo=False, output_override=None, now_utc
                 latest = bars['1M'].index.max() if len(bars['1M']) else 'none'
                 print(f'SKIPPED: {item["pair"]} -- no recent 1M data (latest {latest})', flush=True)
                 continue
-        for tf in EXPECTED_TIMEFRAMES:
+        for tf in cfg['chart']['timeframes']:
             if tf == '8H':
-                bars[tf] = resample_8h(bars['4H'])
+                if '4H' not in bars:
+                    bars['4H'] = provider.get(item['tradingview'], '4H', cfg['chart']['history_bars'] * 2)
+                bars['8H'] = resample_8h(bars['4H'])
             elif tf not in bars:
-                bars[tf] = provider.get(item['tradingview'], tf, cfg['chart']['history_bars'] * (2 if tf == '4H' else 1))
+                bars[tf] = provider.get(item['tradingview'], tf, cfg['chart']['history_bars'] * (2 if tf == '4H' and '8H' in cfg['chart']['timeframes'] else 1))
             if len(bars[tf]) < cfg['chart']['bars']:
                 raise RuntimeError(f'{item["pair"]} {tf}: insufficient candles ({len(bars[tf])})')
         category=item.get('category')
