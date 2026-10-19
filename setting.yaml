@@ -1,15 +1,18 @@
 # Created: 2026-10-10 JST
-# Updated: 2026-10-14 JST — 5分間隔・最新10フォルダ保持
-# 通貨ペア・表示・保存・Saxo認証の公開設定。機密情報は記載しない。
-repository: yuki746289/product_chat_record  # GitHubリポジトリ名（旧Artifactモード用）
+# Updated: 2026-10-19 JST — 各設定値の許容値・固定値・注意点をコメントに明記
+# 通貨ペア・表示・保存・Saxo認証の公開設定。機密情報は記載しない。値そのものは変更していない。
+repository: yuki746289/product_chat_record  # owner/repo形式（例: yuki746289/product_chat_record）。旧GitHub Artifact取得用
 
 provider:
-  type    : tradingview_mcp              # 旧GitHub生成モードの種類（Saxoローカルでは未使用）
-  url     : https://mcp.tradingview.com/mcp  # TradingView MCP接続先（現在は未使用）
-  enabled : false                        # 旧TradingView経由の画像生成を無効化
+  type    : tradingview_mcp  # 現行は tradingview_mcp のみ（Saxo接続方式は local_monitor.mode で指定）
+  url     : https://mcp.tradingview.com/mcp  # HTTPS URL（旧TradingView MCP接続先。Saxoモードでは未使用）
+  enabled : false  # true / false（旧TradingView MCP画像生成の有効/無効。Saxoとは独立）
 
 symbols:
-  # pair=保存ファイル名・Saxo検索銘柄、category=保存先区分、tradingview=旧モードとの互換設定
+  # 1件以上の配列。pairは英大文字・数字・_・-の3〜32文字、重複不可（Saxoでは利用可能なFxSpot銘柄を指定）
+  # categoryは先頭英小文字＋英小文字/数字/_（計1〜40文字）、tradingviewは「市場:銘柄」形式
+  # tradingviewの各側は英数字・_・.・-。Saxoモードでも現行はtradingview項目が必須
+  # pair=保存ファイル名/Saxo銘柄、category=保存先区分、tradingview=旧MCP互換の銘柄識別子
   # クロス円以外（7通貨ペア）
   - {pair: GBPAUD, category: cross_non_jpy, tradingview: FX:GBPAUD}
   - {pair: AUDUSD, category: cross_non_jpy, tradingview: FX:AUDUSD}
@@ -28,38 +31,38 @@ symbols:
   - {pair: NZDJPY, category: cross_jpy, tradingview: FX:NZDJPY}
 
 market:
-  skip_stale         : true  # 古い1分足しか取得できない通貨ペアは画像生成をスキップ
-  max_1m_age_minutes : 10    # 最新1分足の許容経過時間（分）
+  skip_stale         : true  # true / false（旧モードで有効。Saxoローカルは現行常に鮮度を確認）
+  max_1m_age_minutes : 10  # 1〜30の整数（分）。1分足の最新データを許容する経過時間
 
 chart:
-  timeframes         : [1M, 5M, 15M, 1H, 4H, 8H, 1D, 1W, 1Mn]  # 表示する9時間足（並び順固定）
-  ema                : [20, 30, 40]  # EMAの期間
-  rci                : [9, 14, 26]   # RCIの期間
-  columns            : 2              # 画像のチャート列数
-  bars               : 110            # 各時間足の表示本数
-  history_bars       : 220            # EMA/RCI計算用の取得本数
-  right_padding_bars : 12             # チャート右側の余白（本数相当）
-  dpi                : 110            # PNG解像度
-  figsize            : [19, 25]       # 図のサイズ（インチ）
-  timezone           : Asia/Tokyo     # チャート時刻の表示タイムゾーン
-  theme              : dark           # 画像テーマ
+  timeframes         : [1M, 5M, 15M, 1H, 4H, 8H, 1D, 1W, 1Mn]  # 現行固定: [1M, 5M, 15M, 1H, 4H, 8H, 1D, 1W, 1Mn]（9件・順番変更不可。任意化は未実装）
+  ema                : [20, 30, 40]  # 現行固定: [20, 30, 40]（期間の任意指定は未実装）
+  rci                : [9, 14, 26]  # 現行固定: [9, 14, 26]（期間の任意指定は未実装）
+  columns            : 2  # 現行は 2 のみ（描画レイアウトは5行×2列固定）
+  bars               : 110  # 42以上の整数（表示本数）。history_bars以下を推奨
+  history_bars       : 220  # 100〜1200の整数を推奨（Saxo取得上限1200本、bars以上が必要）
+  right_padding_bars : 12  # 0以上の整数を推奨（チャート右余白。負数は現行コードで0に補正）
+  dpi                : 110  # 正の整数を指定（PNG解像度。現行は値の範囲を事前検証しない）
+  figsize            : [19, 25]  # [正の幅, 正の高さ] の数値2個（インチ）。レイアウトは現行固定
+  timezone           : Asia/Tokyo  # IANAタイムゾーン名（例: Asia/Tokyo, Etc/UTC）。画像のタイトルは現行JST固定
+  theme              : dark  # 現行の実効値は dark のみ（他の値を指定しても描画色に反映されない）
 
 output:
-  staging_dir   : output             # 旧GitHub生成モードの一時保存先
-  timezone      : Asia/Tokyo         # 日時フォルダ名のタイムゾーン
-  folder_format : '%Y%m%d_%H%M'      # 日時フォルダ名の書式
-  local_dir     : 'C:/TradingViewCharts'  # Windows上のPNG保存先
-  artifact_name : charts             # 旧GitHub Artifactモードでの成果物名
+  staging_dir   : output  # 任意の保存ディレクトリパス（旧GitHub画像生成モード用）
+  timezone      : Asia/Tokyo  # IANAタイムゾーン名（例: Asia/Tokyo）。日時フォルダ作成時の基準
+  folder_format : '%Y%m%d_%H%M'  # 実質固定: '%Y%m%d_%H%M'（変更すると既存のフォルダ保持・削除処理が対応できない）
+  local_dir     : 'C:/TradingViewCharts'  # 絶対パス／setting.yaml基準の相対パス（再インストール時はinstall.image_folderへ再設定）
+  artifact_name : charts  # 文字列（旧GitHub Artifact取得モードの成果物名）
 
 # App Key、App Secret、Access/Refresh TokenはWindows資格情報マネージャーに保存する。
 saxo:
-  enabled      : true                            # Saxoローカル取得を有効化
-  environment  : sim                             # Saxoの接続環境（sim/live）
-  redirect_uri : http://localhost:8765/callback  # OAuth認証の戻り先（登録値と一致させる）
-  price_side   : bid                             # OHLCに使用する価格サイド（bid/ask）
+  enabled      : true  # true / false（Saxoローカルでのチャート生成の有効/無効）
+  environment  : sim  # sim / live（Saxoの接続環境。認証情報と一致させる）
+  redirect_uri : http://localhost:8765/callback  # http://localhost:ポート/パス または http://127.0.0.1:ポート/パス（Saxo登録値と一致）
+  price_side   : bid  # bid / ask（OHLCの価格サイド）
 
 local_monitor:
-  mode                   : saxo_local  # Windows常駐の取得方式（Saxo）
-  poll_seconds           : 60          # 状態確認間隔（秒、5分スロットの開始後に取得）
-  chart_interval_minutes : 5           # PNGを新規生成する間隔（分）
-  max_folders            : 10          # 保持する日時フォルダ数の上限（11個目以降を削除）
+  mode                   : saxo_local  # saxo_local / github（ローカル取得方式）
+  poll_seconds           : 60  # 30〜3600の整数（秒）。状態確認の間隔
+  chart_interval_minutes : 5  # 5 / 15 / 30 / 60（分）。Saxo PNG生成スロットの間隔
+  max_folders            : 10  # 1〜1000の整数（PNGのある日時フォルダの保持上限、超過分は削除）
