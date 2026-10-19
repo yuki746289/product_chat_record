@@ -128,13 +128,13 @@ def _save_state(root, ids):
     temp.replace(path)
 
 
-def _find_artifact_batch(temp_dir, configured_pairs):
+def _find_artifact_batch(temp_dir, configured_pairs, time_zone="Asia/Tokyo", folder_format="%Y%m%d_%H%M"):
     choices = []
     base = Path(temp_dir)
     for candidate in [base, *base.rglob("*")]:
         if not candidate.is_dir() or candidate.is_symlink():
             continue
-        if not STAMP.fullmatch(candidate.name):
+        if parse_chart_stamp(candidate.name, time_zone, folder_format) is None:
             continue
         # Accept both the historical flat artifact and nested category output.
         roots = [candidate, *(child for child in candidate.iterdir()
@@ -188,7 +188,7 @@ def poll_once(config_path, now=None):
             with tempfile.TemporaryDirectory() as temp:
                 _gh("run", "download", run_id, "-R", repo, "-n", artifact_name,
                     "-D", temp)
-                batch, files = _find_artifact_batch(temp, pairs)
+                batch, files = _find_artifact_batch(temp, pairs, cfg["output"]["timezone"], cfg["output"]["folder_format"])
                 if parse_chart_stamp(batch.name, cfg["output"]["timezone"], cfg["output"]["folder_format"]) is None:
                     raise ValueError(f"Invalid timestamp folder: {batch.name}")
                 target = root / batch.name
