@@ -86,7 +86,7 @@ def render_pair(bars, pair, dest, cfg, timestamp, demo=False, source_label=None,
         'RCI                      ' + ' / '.join(map(str, chart['rci'])),
         f'LAYOUT             {columns} columns / {rows} rows',
         f'RIGHT MARGIN   {right_padding_bars} bars',
-        '8H BAR              ' + (eight_hour_label or 'UTC-anchored 4H aggregation'),
+        *(['8H BAR              ' + (eight_hour_label or 'UTC-anchored 4H aggregation')] if '8H' in timeframes else []),
         'SOURCE             ' + ('SYNTHETIC DEMO (NOT MARKET DATA)' if demo else (source_label or 'TradingView MCP')),
         '', 'Times and calculations may differ from TradingView UI',
     ]
