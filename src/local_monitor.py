@@ -7,7 +7,6 @@ are created by this module. All times are timezone-aware.
 from datetime import datetime, timezone
 import json
 from pathlib import Path
-import re
 import shutil
 import subprocess
 import tempfile
@@ -15,7 +14,6 @@ from zoneinfo import ZoneInfo
 
 from .config import load_settings
 
-STAMP = re.compile(r"\d{8}_\d{4}\Z")
 PNG_HEADER = b"\x89PNG\r\n\x1a\n"
 
 
