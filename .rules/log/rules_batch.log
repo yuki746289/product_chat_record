@@ -1,0 +1,9 @@
+2026-05-19 smaple.pine v1.0 手順1: 要件定義書を作成。対象: sample/smaple.pine_v1.0/smaple.pine_v1.0_1_request.md
+2026-05-19 smaple.pine v1.0 手順2: 基本設計書を作成。対象: sample/smaple.pine_v1.0/smaple.pine_v1.0_2_base.md
+2026-05-19 smaple.pine v1.0 手順3: 基本設計書確認を作成。対象: sample/smaple.pine_v1.0/smaple.pine_v1.0_3_base_confirm.md
+2026-05-19 smaple.pine v1.0 手順4: 詳細設計書と詳細設計JSONを作成。対象: sample/smaple.pine_v1.0/smaple.pine_v1.0_4_detail.md, sample/smaple.pine_v1.0/smaple.pine_v1.0_4_detail.json
+2026-05-19 smaple.pine v1.0 手順5: 実装用統合JSONを作成。対象: sample/smaple.pine_v1.0/smaple.pine_v1.0_5_detail.json
+2026-05-19 smaple.pine v1.0 手順6: Pine Scriptコードを作成。対象: sample/smaple.pine_v1.0/smaple.pine_v1.0.pine
+2026-05-19 smaple.pine v1.0 手順7: コード確認結果を作成。対象: sample/smaple.pine_v1.0/smaple.pine_v1.0_7_code_confirm.md
+2026-05-19 smaple.pine v1.0 手順8: 仕様書を作成。対象: .document/仕様_差分_v1.0.md, .document/仕様_全体_v1.0.md
+2026-05-19 smaple.pine v1.0 手順9: 仕様確認結果を作成。対象: .document/仕様確認_v1.0.md
