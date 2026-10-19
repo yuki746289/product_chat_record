@@ -1,0 +1,25 @@
+# Created: 2026-10-19 JST
+# Offline-only regression validation for chart settings; no Saxo credentials/API.
+name: ChartRecorder Configurable Settings QA
+on:
+  push:
+    branches: [develop]
+    paths:
+      - .github/workflows/configurable_charts_ci_20261019.yml
+      - tests/test_configurable_chart_20261019.py
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Full regression suite
+        run: python -m pytest -q
