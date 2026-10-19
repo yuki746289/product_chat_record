@@ -1,0 +1,65 @@
+# FRED公開カレンダーの検証用ID対応表。一次発表元の公式確認や本番利用許諾の完了を意味しない。
+schema_version: 1
+version: "2026-10-19.1"
+policy_version: "2026-10-15.1"
+provider: "St. Louis Federal Reserve Bank / FRED"
+source_tier: "public_institutional_secondary_calendar"
+usage_status: "research_only_pending_terms_and_primary_publisher_validation"
+calendar_timezone: "America/Chicago"
+parsing_rule: "same_date_same_time_same_release_name_adjacency_required"
+calendar_entry_is_not_primary_publisher_timestamp: true
+series:
+  - master_indicator_id: "US_EMPLOYMENT"
+    priority: "S"
+    release_id: 50
+    source_title_exact: "Employment Situation"
+    source_url: "https://fred.stlouisfed.org/releases/calendar?rid=50&y=2026"
+    proven_date: "2026-11-06"
+    observed_utc: "2026-11-06T13:30:00Z"
+    observed_jst: "2026-11-06T22:30:00+09:00"
+    proof_run: 39204290773
+  - master_indicator_id: "US_CPI"
+    priority: "S"
+    release_id: 10
+    source_title_exact: "Consumer Price Index"
+    source_url: "https://fred.stlouisfed.org/releases/calendar?rid=10&y=2026"
+    proven_date: "2026-11-10"
+    observed_utc: "2026-11-10T13:30:00Z"
+    observed_jst: "2026-11-10T22:30:00+09:00"
+    proof_run: 39204290773
+  - master_indicator_id: "US_PPI"
+    priority: "A"
+    release_id: 46
+    source_title_exact: "Producer Price Index"
+    source_url: "https://fred.stlouisfed.org/releases/calendar?rid=46&y=2026"
+    proven_date: "2026-11-13"
+    observed_utc: "2026-11-13T13:30:00Z"
+    observed_jst: "2026-11-13T22:30:00+09:00"
+    proof_run: 39204290773
+  - master_indicator_id: "US_PCE"
+    priority: "S"
+    release_id: 54
+    source_title_exact: "Personal Income and Outlays"
+    source_url: "https://fred.stlouisfed.org/releases/calendar?rid=54&y=2026"
+    proven_date: "2026-10-29"
+    observed_utc: "2026-10-29T12:30:00Z"
+    observed_jst: "2026-10-29T21:30:00+09:00"
+    proof_run: 39204290773
+  - master_indicator_id: "US_GDP"
+    priority: "A"
+    release_id: 53
+    source_title_exact: "Gross Domestic Product"
+    source_url: "https://fred.stlouisfed.org/releases/calendar?rid=53&y=2026"
+    proven_date: "2026-10-29"
+    observed_utc: "2026-10-29T12:30:00Z"
+    observed_jst: "2026-10-29T21:30:00+09:00"
+    proof_run: 39204290773
+  - master_indicator_id: "US_RETAIL"
+    priority: "A"
+    release_id: 9
+    source_title_exact: "Advance Monthly Sales for Retail and Food Services"
+    source_url: "https://fred.stlouisfed.org/releases/calendar?rid=9&y=2026"
+    proven_date: "2026-11-17"
+    observed_utc: "2026-11-17T13:30:00Z"
+    observed_jst: "2026-11-17T22:30:00+09:00"
+    proof_run: 39204290773
