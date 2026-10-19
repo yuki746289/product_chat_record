@@ -101,3 +101,9 @@ main / develop / release_0.1.0のみ維持し、例外的な検証ブランチ�
 - [53指標台帳](../.document/v0.2/23_重要指標53件_無料取得カバレッジ台帳_20261016.md)：**限定実証18/53（従来12＋二次集約6）、未実証35/53**。
 - FREDは各統計の一次公表元ではなく、ソース間不一致時に一次機関を優先する。正式利用権と画像化の確認が済むまでは本番接続しない。
 - NZD公式ICS、Eurostat公式ICS、米BLS一次時刻の独立照合等はNG継続。REL-020-01〜08のリリース停止条件は変更しない。
+
+## 2026-10-19 米国一次予定との照合とBEA公式ICSの直接取得（ECO-021）
+- [一次公表機関との照合監査](../.document/v0.2/27_米国6指標_一次情報日時照合_20261019.md)を追加。FRED補助カレンダー6系列をBLS3/BEA2/Census1の一次日程と照合し、予定日・時刻一致を確認。
+- BEAの公式ICSは[Run #39227247707](https://github.com/yuki746289/product_chat_record/actions/runs/39227247707)で166イベントを取得、[Run #39227699077](https://github.com/yuki746289/product_chat_record/actions/runs/39227699077)でGDP/PCEを直接ICS→JST→S/A→共通JSON Schema検証2件PASS。
+- BLS3系列の一次予定はWeb照合のみ、Actions HTTP403は未解消。Census小売も一次Web照合のみ。継続API/ICS自動運用の利用許諾・本番監視は未達。
+- 53指標の限定実証数は**18/53のまま**で、根拠区分を精緻化した。リリース条件はNG継続。
