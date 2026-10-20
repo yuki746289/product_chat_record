@@ -100,3 +100,10 @@ DB・テーブルは初版で必須としない。マスターのファイル形
 - 取得時刻は`DTSTART`のタイムゾーンを使い`Asia/Tokyo`へ変換。2026年10月～12月の対象4件はいずれもJST 06:45。
 - Stats NZは一般的に自作コンテンツをCC BY 4.0で提供（https://www.stats.govt.nz/about-us/copyright/）。出典表示を必須とし、例外の第三者著作物・運用アクセス条件は後続で確認。`license_status=PENDING`を維持。
 - 対象8地域のうちNZだけを検査した部分例なので`coverage_status=INCOMPLETE`。`forecast`/`actual`/`previous`は取得していないため`null`。運用アプリは未実装。
+
+## ECO-023/024 ANZ・Eurostatの公式予定（2026-10-20）
+- ANZ公式の2026発表予定PDFを無認証HTTPで取得し、NZ_BUSINESS/Aに照合・Schema PASS。PDFは2025年12月15日時点の「subject to change」付き日程で、10月29日13:00 NZDT＝09:00 JST。正本IDはPDFに存在しないため発表元UIDを捏造しない。
+- Eurostat公式カレンダーHTMLに記述された`/eurostat/o/calendars/eventsJson`へ、実際のFullCalendarパラメータでアクセス。全体105件・Euro indicators25件の公式表示用JSONを取得。EU_HICP（2発表）、EU_GDP（1発表）を固定S/AとSchemaで検証。
+- Eurostat JSONは`start`日時があるが検証対象の`allDay=true`を尊重し、`time_precision=UNKNOWN`、`date_utc/date_jst=null`とする。値から勝手に発表時刻を決めない。
+- 試験クロスウォークは`30_ANZ_Eurostat_指標対応_検証用.yaml`。実証経緯は`31_ANZ_Eurostat_公式無料取得監査_20261020.md`。
+- どちらも利用条件/自動収集・保存・PNG化・出典表示について最終確認未了。`license_status=PENDING`、`coverage_status=INCOMPLETE`。正規化データに市場予想値・結果値を補完しない。
