@@ -1,0 +1,59 @@
+# 経済指標の取得元別クロスウォーク（検証用。正式アダプター未実装）
+schema_version: 1
+mapping_version: "2026-10-20.1"
+master_policy_version: "2026-10-15.1"
+state: "research_only"
+mappings:
+  - provider: "ANZ_NZ_PUBLISHED_SCHEDULE_PDF"
+    source_url: "https://www.anz.co.nz/content/dam/anzconz/documents/economics-and-market-research/ANZ-NZ-Release-Schedule.pdf"
+    country: "NZ"
+    currency: "NZD"
+    source_title_exact: "ANZ Business Outlook"
+    master_indicator_id: "NZ_BUSINESS"
+    priority: "A"
+    sample_local: "2026-10-29T13:00:00+13:00"
+    sample_jst: "2026-10-29T09:00:00+09:00"
+    schedule_as_of: "2025-12-15"
+    may_change: true
+    source_record_id: "DERIVED_NOT_PUBLISHER_UID"
+    automated_retrieval_proof: 39369561725
+    usage_rights: "PENDING"
+  - provider: "EUROSTAT_PUBLIC_CALENDAR_EVENTS_JSON"
+    source_url: "https://ec.europa.eu/eurostat/o/calendars/eventsJson"
+    country: "EU"
+    currency: "EUR"
+    source_title_exact: "Flash estimate inflation euro area"
+    provider_record_id: "22494168"
+    master_indicator_id: "EU_HICP"
+    priority: "S"
+    sample_event_date: "2026-10-02"
+    provider_all_day: true
+    display_time_status: "UNKNOWN"
+    automated_retrieval_proof: 39369891456
+    usage_rights: "PENDING"
+  - provider: "EUROSTAT_PUBLIC_CALENDAR_EVENTS_JSON"
+    source_url: "https://ec.europa.eu/eurostat/o/calendars/eventsJson"
+    country: "EU"
+    currency: "EUR"
+    source_title_exact: "Inflation (HICP)"
+    provider_record_id: "22494298"
+    master_indicator_id: "EU_HICP"
+    priority: "S"
+    sample_event_date: "2026-10-16"
+    provider_all_day: true
+    display_time_status: "UNKNOWN"
+    automated_retrieval_proof: 39369891456
+    usage_rights: "PENDING"
+  - provider: "EUROSTAT_PUBLIC_CALENDAR_EVENTS_JSON"
+    source_url: "https://ec.europa.eu/eurostat/o/calendars/eventsJson"
+    country: "EU"
+    currency: "EUR"
+    source_title_exact: "Preliminary flash estimate GDP - EU and euro area"
+    provider_record_id: "22494395"
+    master_indicator_id: "EU_GDP"
+    priority: "A"
+    sample_event_date: "2026-10-30"
+    provider_all_day: true
+    display_time_status: "UNKNOWN"
+    automated_retrieval_proof: 39369891456
+    usage_rights: "PENDING"
