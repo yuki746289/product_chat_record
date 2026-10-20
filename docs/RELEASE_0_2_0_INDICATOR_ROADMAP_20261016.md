@@ -114,3 +114,11 @@ main / develop / release_0.1.0のみ維持し、例外的な検証ブランチ�
 - [照合マスター](../.document/v0.2/28_StatsNZ_4指標_公式ICS照合.yaml) と [取得監査](../.document/v0.2/29_StatsNZ公式ICS_4指標取得実証_20261019.md) を追加。Stats NZ著作権案内はCC BY4.0原則と出典表示を求めるため、正式利用時には表示する。
 - [53指標の監査台帳](../.document/v0.2/23_重要指標53件_無料取得カバレッジ台帳_20261016.md)は**限定実証22/53、未実証31/53、NZD4/6**へ更新。
 - RBNZ政策金利・NZ企業景況感、Eurostat ICS、Windows実機/PNG実装は未達。新リリース作成の停止条件は維持。
+
+## 2026-10-20 ANZ企業景況感・Eurostat公式JSON取得の進捗
+- [ANZ PDF→NZ_BUSINESS/A の試験 #39369561725](https://github.com/yuki746289/product_chat_record/actions/runs/39369561725)：公式2026年発表予定PDFを取得し、10月29日13:00 NZDT→09:00 JST、共通JSON Schema PASS。公式予定は変更され得る。
+- [Eurostat JSON取得 #39369682243](https://github.com/yuki746289/product_chat_record/actions/runs/39369682243)：公式表示用JSONで全体105件・Euro indicators25件取得。
+- [Eurostat HICP/GDP Schema試験 #39369891456](https://github.com/yuki746289/product_chat_record/actions/runs/39369891456)：EU_HICP2予定/1グループとEU_GDP1予定/1グループを固定S/Aへ照合。allDay=trueにより時刻UNKNOWNのSchema PASS。
+- [検証用対応表](../.document/v0.2/30_ANZ_Eurostat_指標対応_検証用.yaml)、[監査](../.document/v0.2/31_ANZ_Eurostat_公式無料取得監査_20261020.md)、[53指標台帳](../.document/v0.2/23_重要指標53件_無料取得カバレッジ台帳_20261016.md)へ反映。
+- **限定実証25/53、未実証28/53。NZD5/6、EUR4/8。** 全件収集・利用許諾・Windows本体組込み・PNGの正式受け入れには至っていない。
+- RBNZはHTTP403継続。`main`・`release_0.1.0`を凍結し、`release_0.2.0`は全受入条件PASSまで作らない。
