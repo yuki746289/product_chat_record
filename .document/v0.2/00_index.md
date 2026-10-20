@@ -49,6 +49,9 @@
 | [28_StatsNZ_4指標_公式ICS照合.yaml](28_StatsNZ_4指標_公式ICS照合.yaml) | ADD | Stats NZ公式ICSの原名称と既存S/A IDの対応 | ECO-022 |
 | [29_StatsNZ公式ICS_4指標取得実証_20261019.md](29_StatsNZ公式ICS_4指標取得実証_20261019.md) | ADD | 140イベント取得・NZD4系列のJST/JSON検証 | ECO-022 |
 
+| [30_ANZ_Eurostat_指標対応_検証用.yaml](30_ANZ_Eurostat_指標対応_検証用.yaml) | ADD | ANZ・Eurostatの公表名称から独自S/Aへの限定クロスウォーク | ECO-023, ECO-024 |
+| [31_ANZ_Eurostat_公式無料取得監査_20261020.md](31_ANZ_Eurostat_公式無料取得監査_20261020.md) | ADD | 公式PDF・JSON取得と時刻未確定の検証結果 | ECO-023, ECO-024 |
+
 ## 仕様ID対応
 - ECO-001: 起動時の当日処理 — `05`
 - ECO-002: 対象通貨とS/A判定 — `02`, `06`
@@ -83,6 +86,9 @@
 - ECO-021: FRED米国6系列の一次公表機関日時照合・BEA公式ICS実証 — `27`, `23`
 
 - ECO-022: Stats NZ公式ICSの取得とNZD4系列の固定S/A・共通JSON検証 — `28`, `29`, `23`
+
+- ECO-023: ANZ企業景況感の無料PDFによる日程取得・正規化 — `30`, `31`, `23`
+- ECO-024: Eurostat JSONによるHICP・GDP取得とallDay時刻未確定処理 — `30`, `31`, `23`
 
 ## 未決事項
 あり。データ提供元の無人API接続、イベント名マッピング確定、厳密な時間制限・画像サイズ・更新方式は [10](10_未決事項・変更履歴.md) に記載。これらを推測で「承認済み」扱いしない。
